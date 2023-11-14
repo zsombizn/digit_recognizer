@@ -1,7 +1,8 @@
+#include "io.h"
+#include "neural_net.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "neural_net.h"
 
 
 int main() {
@@ -81,6 +82,13 @@ int main() {
     shuffle(arr, sizeof(int), len);
 
     printf("shuffled: %d %d %d\n", arr[0], arr[1], arr[2]);
+
+    size_t num_examples;
+
+    Matrix *images;
+    int *labels;
+    
+    read_MNIST_data("train-images-idx3-ubyte", "train-labels-idx1-ubyte", &num_examples, &images, &labels);
 
 
     return 0;

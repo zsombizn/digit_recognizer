@@ -1,9 +1,9 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g
-TARGET = my_program
+TARGET = digit_recognizer
 OBJ_DIR = obj
 
-SRCS = main.c neural_net.c
+SRCS = main.c neural_net.c io.c
 OBJS = $(patsubst %.c,$(OBJ_DIR)/%.o,$(SRCS))
 
 all: $(TARGET)
