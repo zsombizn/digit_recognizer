@@ -5,7 +5,7 @@
 
 
 int main() {
-    srand(time(NULL));
+    srand(clock());
 
     Matrix *M = newMatrix(8, 1);
 
@@ -64,6 +64,24 @@ int main() {
     Matrix *Scalar_p = scalar_p_M(X, 3.14); 
     printf("Scalar_p--3.14------\n");
     print_M(Scalar_p);
+
+    printf("Random int: %d, %d, %d\n", randint(1, 5), randint(5, 10), randint(6, 7));
+
+    size_t len = 3;
+    int *arr = malloc(sizeof(int) * len);
+
+    arr[0] = 2;
+    arr[1] = 1;
+    arr[2] = 0;
+
+    swap(&arr[0], &arr[2], sizeof(int));
+
+    printf("swapped: %d %d %d\n", arr[0], arr[1], arr[2]);
+
+    shuffle(arr, sizeof(int), len);
+
+    printf("shuffled: %d %d %d\n", arr[0], arr[1], arr[2]);
+
 
     return 0;
 }

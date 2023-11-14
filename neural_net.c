@@ -1,6 +1,7 @@
 #include "neural_net.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 
 Matrix *newMatrix(int rows, int columns) {
@@ -115,7 +116,12 @@ void fill_from_array_M(Matrix *A, double *arr, unsigned int len) {
 
 double randf(double min, double max) {
     double scale = rand() / (double) RAND_MAX;
-    return min + scale * ( max - min );
+    return min + scale * (max - min);
+}
+
+
+int randint(int min, int max) {
+    return min + ( rand() % (max-min+1) );
 }
 
 
@@ -124,5 +130,26 @@ void rand_M(Matrix *A, double min, double max) {
         for (unsigned int j = 0; j < A->columns; j++) {
             M_index(A, i, j) = randf(min, max);
         }
+    }
+}
+
+
+void swap(void *a, void *b, size_t size) {
+    char *tmp = malloc(size);
+    memcpy(tmp, a, size);
+    memcpy(a, b, size);
+    memcpy(b, tmp, size);
+
+    free(tmp);
+}
+
+
+void shuffle(void *arr, size_t size, size_t len) {
+    int n;
+    for (size_t i = 0; i < len; i++) {
+        n = randint(0, len-1);
+
+        // arr[i] <-> arr[n]
+        swap(arr + (size * i), arr + (size * n), size);
     }
 }
