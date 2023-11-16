@@ -1,7 +1,7 @@
 #include "neural_net.h"
+#include "utils.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 
 
 Matrix *newMatrix(int rows, int columns) {
@@ -23,6 +23,35 @@ Matrix *newMatrix(int rows, int columns) {
 
     return Res;
 }
+
+
+void newMatrixAt(Matrix *dest, int rows, int columns) {
+    dest->rows = rows;
+    dest->columns = columns;
+    dest->data = malloc(sizeof(double) * rows * columns);
+
+    if (dest->data == NULL) {
+        fprintf(stderr, "Failed allocation!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < columns; j++) {
+            M_index(dest, i, j) = 0.0;
+        }
+    }
+}
+
+
+void freeMatrix(Matrix *dest) {
+    if (dest == NULL) {
+        return;
+    }
+
+    free(dest->data);
+    free(dest);
+}
+
 
 
 Matrix *product_M(Matrix *A, Matrix *B) {
@@ -113,18 +142,6 @@ void fill_from_array_M(Matrix *A, double *arr, unsigned int len) {
     }
 }
 
-
-double randf(double min, double max) {
-    double scale = rand() / (double) RAND_MAX;
-    return min + scale * (max - min);
-}
-
-
-int randint(int min, int max) {
-    return min + ( rand() % (max-min+1) );
-}
-
-
 void rand_M(Matrix *A, double min, double max) {
     for (unsigned int i = 0; i < A->rows; i++) {
         for (unsigned int j = 0; j < A->columns; j++) {
@@ -134,22 +151,19 @@ void rand_M(Matrix *A, double min, double max) {
 }
 
 
-void swap(void *a, void *b, size_t size) {
-    char *tmp = malloc(size);
-    memcpy(tmp, a, size);
-    memcpy(a, b, size);
-    memcpy(b, tmp, size);
-
-    free(tmp);
-}
-
-
-void shuffle(void *arr, size_t size, size_t len) {
-    int n;
-    for (size_t i = 0; i < len; i++) {
-        n = randint(0, len-1);
-
-        // arr[i] <-> arr[n]
-        swap(arr + (size * i), arr + (size * n), size);
+void ascii_print_M(Matrix *A) {
+    double n;
+    for(unsigned int i = 0; i < A->rows; i++) {
+        for (unsigned int j = 0; j < A->columns; j++) {
+            n = M_index(A, i, j);
+            if (n > 125) {
+                putchar('#');
+            } else if (n > 50) {
+                putchar('.');
+            } else {
+                putchar(' ');
+            }
+        }
+        putchar('\n');
     }
 }
