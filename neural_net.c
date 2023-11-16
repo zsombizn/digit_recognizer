@@ -6,6 +6,10 @@
 
 Matrix *newMatrix(int rows, int columns) {
     Matrix *Res = malloc(sizeof(Matrix));
+    if (Res == NULL) {
+        fprintf(stderr, "Failed allocating memory!\n");
+        exit(EXIT_FAILURE);
+    }
     Res->rows = rows;
     Res->columns = columns;
     Res->data = malloc(sizeof(double) * rows * columns);
@@ -129,7 +133,7 @@ void print_M(Matrix *A) {
 }
 
 
-void fill_from_array_M(Matrix *A, double *arr, unsigned int len) {
+void fill_from_array_M(Matrix *A, uint8_t *arr, unsigned int len) {
     if (A->rows * A->columns != len) {
         fprintf(stderr, "Invalid number of elements in array!\n");
         exit(EXIT_FAILURE);

@@ -9,7 +9,7 @@
 
 void msb_to_lsb(void *target, size_t size) {
     for (size_t i = 0; i < size / 2; i++) {
-        swap(target + i, target + (size - i - 1), 1);
+        swap((char *)target + i, (char*)target + (size - i - 1), 1);
     }
 }
 
@@ -60,14 +60,22 @@ void read_MNIST_data(const char *images_fname, const char *labels_fname, Example
 
     uint8_t data;
     *images = malloc(sizeof(Example) * images_len);
+    if (*images == NULL) {
+        fprintf(stderr, "Failed allocating memory!\n");
+        exit(EXIT_FAILURE);
+    }
     
     for (size_t i = 0; i < *len; i++) {
 
-        (*images)[i].vector_M = newMatrix(rows * columns, 1);
+        (*images)[i].data_array = malloc(sizeof(uint8_t) * rows * columns);
+        if ((*images)[i].data_array == NULL) {
+            fprintf(stderr, "Failed allocating memory!\n");
+            exit(EXIT_FAILURE);
+        }
 
         for (size_t k = 0; k < rows * columns; k++) {
             fread(&data, 1, 1, raw_images);
-            M_index((*images)[i].vector_M, k, 1) = data;
+            (*images)[i].data_array[k] = data;
             
         }
         if (i % 1000 == 0){

@@ -4,10 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/**
- * @struct Matrix
- * @brief Contains doubles.
- */
+
 typedef struct {
     unsigned int rows;
     unsigned int columns;
@@ -18,7 +15,7 @@ typedef struct {
 
 typedef struct {
     uint8_t label;
-    Matrix *vector_M;
+    uint8_t *data_array;
 } Example;
 
 

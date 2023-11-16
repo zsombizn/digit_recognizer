@@ -88,50 +88,48 @@ int main() {
 
     Example *images;
     
-    read_MNIST_data("train-images-idx3-ubyte", "train-labels-idx1-ubyte", &images, &num_examples);
+    read_MNIST_data("train-images.idx3-ubyte", "train-labels.idx1-ubyte", &images, &num_examples);
 
     shuffle(images, sizeof(Example), num_examples);
 
-    Matrix *prod;
-
+    Matrix* temp_M;
     uint8_t counter = 0;
     char filename[20];
     while (counter < 10) {
-        int example = randint(0, (int) num_examples);
+        int example = randint(0, (int)num_examples);
         if (images[example].label == counter) {
-            images[example].vector_M->rows = 28;
-            images[example].vector_M->columns = 28;
-            prod = product_M(images[example].vector_M, images[example].vector_M);
+            temp_M = newMatrix(28, 28);
+            fill_from_array_M(temp_M, images[example].data_array, 28 * 28);
+
 
             sprintf(filename, "%d.bmp", counter);
-            write_Matrix_BMP(filename, images[example].vector_M);
-            ascii_print_M(images[example].vector_M);
-            images[example].vector_M->rows = 28 * 28;
-            images[example].vector_M->columns = 1;
+            write_Matrix_BMP(filename, temp_M);
+            ascii_print_M(temp_M);
+            
+            freeMatrix(temp_M);
             counter++;
         }
     }
 
-    printf("0: label------(%d)\n", images[0].label);
-
-
     
-    Matrix *random = newMatrix(125, 125);
-    for (unsigned int i = 0; i < random->rows; i++) {
-        for (unsigned int j = 0; j < random->columns; j++) {
-            M_index(random, i, j) = 255;
-        }
-    }
+   Matrix *random = newMatrix(125, 125);
+   for (unsigned int i = 0; i < random->rows; i++) {
+       for (unsigned int j = 0; j < random->columns; j++) {
+           M_index(random, i, j) = 255;
+       }
+   }
+    
 
     write_Matrix_BMP("Random.bmp", random);
-    
-    write_Matrix_BMP("Prod.bmp", prod);
-    //ascii_print_M(random);
+
+
+    freeMatrix(random);
 
 
     for (size_t i = 0; i < num_examples; i++) {
-        freeMatrix(images[i].vector_M);
+        free(images[i].data_array);
     }
+
     free(images);
 
     return 0;

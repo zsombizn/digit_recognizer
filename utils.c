@@ -29,6 +29,6 @@ void shuffle(void *arr, size_t size, size_t len) {
         n = randint(0, len-1);
 
         // arr[i] <-> arr[n]
-        swap(arr + (size * i), arr + (size * n), size);
+        swap((char*)arr + (size * i), (char*)arr + (size * n), size);
     }
 }
