@@ -113,13 +113,14 @@ void write_Matrix_BMP(const char *fname, Matrix *M) {
         .important_colors = 0
     };
 
-    int written_bytes = 0;
     FILE *image = fopen(fname, "wb");
+    if (image == NULL) {
+        fprintf(stderr, "Failed creating file!\n");
+        exit(EXIT_FAILURE);
+    }
 
     fwrite(&header, sizeof(BMP_HEADER), 1, image);
     fwrite(&dib, sizeof(BITPMAPINFOHEADER), 1, image);
-
-    written_bytes += sizeof(BMP_HEADER) + sizeof(BITPMAPINFOHEADER);
 
     // writing pixel data https://en.wikipedia.org/wiki/BMP_file_format#Pixel_storage
 
@@ -132,7 +133,6 @@ void write_Matrix_BMP(const char *fname, Matrix *M) {
             fwrite(&pixel_value, 1, 1, image);
             fwrite(&pixel_value, 1, 1, image);
             fwrite(&pixel_value, 1, 1, image);
-            written_bytes += 3;
         }
         // padding of rows
 
@@ -140,12 +140,9 @@ void write_Matrix_BMP(const char *fname, Matrix *M) {
 
         while (row_width % 4 != 0) {
             fputc(0, image);
-            written_bytes ++;
             row_width++;
         }
     }
-
-    printf("%d written out. Header size: %d\n", written_bytes, sizeof(BMP_HEADER) + sizeof(BITPMAPINFOHEADER));
 
     fclose(image);
 
