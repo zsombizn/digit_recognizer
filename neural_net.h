@@ -27,7 +27,7 @@ Matrix *scalar_p_M(Matrix *A, double n);
 Matrix *transpose_M(Matrix *A);
 void sum_M(Matrix *Res, Matrix *A);
 void print_M(Matrix *A);
-void fill_from_array_M(Matrix *A, double *arr, unsigned int len);
+void fill_from_array_M(Matrix *A, uint8_t *arr, unsigned int len);
 void rand_M(Matrix *A, double min, double max);
 void ascii_print_M(Matrix *A);
 
