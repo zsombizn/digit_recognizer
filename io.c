@@ -89,11 +89,11 @@ void read_MNIST_data(const char *images_fname, const char *labels_fname, Example
 
 }
 
-
+// the size of the rows should include the paddig 0-s
 void write_Matrix_BMP(const char *fname, Matrix *M) {
     BMP_HEADER header = {
         .signature = 0x4d42,
-        .fileSize = sizeof(BMP_HEADER) + sizeof(BITPMAPINFOHEADER) + M->rows * M->columns * 24,
+        .fileSize = sizeof(BMP_HEADER) + sizeof(BITPMAPINFOHEADER) + ( ((M->columns * 3 + 3)/4)*4 ) * M->rows,
         .reserved1 = 0,
         .reserved2 = 0,
         .offset = sizeof(BMP_HEADER) + sizeof(BITPMAPINFOHEADER)
@@ -113,22 +113,26 @@ void write_Matrix_BMP(const char *fname, Matrix *M) {
         .important_colors = 0
     };
 
+    int written_bytes = 0;
     FILE *image = fopen(fname, "wb");
 
     fwrite(&header, sizeof(BMP_HEADER), 1, image);
     fwrite(&dib, sizeof(BITPMAPINFOHEADER), 1, image);
+
+    written_bytes += sizeof(BMP_HEADER) + sizeof(BITPMAPINFOHEADER);
 
     // writing pixel data https://en.wikipedia.org/wiki/BMP_file_format#Pixel_storage
 
     uint8_t pixel_value;
     int i, j;
     int row_width;  // in bytes
-    for (i = M->rows-1; i > 0; i--) {
-        for (j = 0; j < M->columns; j++) {
+    for (i = M->rows-1; i >= 0; i--) {
+        for (j = 0; j < (int) M->columns; j++) {
             pixel_value = (uint8_t) M_index(M, i, j);
             fwrite(&pixel_value, 1, 1, image);
             fwrite(&pixel_value, 1, 1, image);
             fwrite(&pixel_value, 1, 1, image);
+            written_bytes += 3;
         }
         // padding of rows
 
@@ -136,9 +140,12 @@ void write_Matrix_BMP(const char *fname, Matrix *M) {
 
         while (row_width % 4 != 0) {
             fputc(0, image);
+            written_bytes ++;
             row_width++;
         }
     }
+
+    printf("%d written out. Header size: %d\n", written_bytes, sizeof(BMP_HEADER) + sizeof(BITPMAPINFOHEADER));
 
     fclose(image);
 
