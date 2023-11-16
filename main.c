@@ -6,6 +6,41 @@
 #include <time.h>
 
 
+void export_examples_BMP(Example *images, size_t num_examples) {
+    char dirname[10];
+    char filename[40];
+    Matrix *temp_M = newMatrix(28, 28);
+
+    if (mkdir("images", 0755) != 0) {
+        fprintf(stderr, "Failed creating directory!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (int n = 0; n < 10; n++) {
+        sprintf(dirname, "images/%d", n);
+        if (mkdir(dirname, 0755) != 0) {
+            fprintf(stderr, "Failed creating directory!\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    for (size_t i = 0; i < num_examples; i++) {
+        sprintf(filename, "images/%d/%d.bmp", images[i].label, i);
+
+        fill_from_array_M(temp_M, images[i].data_array, 28 * 28);
+
+        write_Matrix_BMP(filename, temp_M);
+        if (i % 1000 == 0) {
+            putchar('#');
+            fflush(stdin);
+        }
+
+    }
+    putchar('\n');
+    free(temp_M);
+}
+
+
 int main() {
     srand(clock());
 
@@ -91,34 +126,21 @@ int main() {
     read_MNIST_data("train-images.idx3-ubyte", "train-labels.idx1-ubyte", &images, &num_examples);
 
     shuffle(images, sizeof(Example), num_examples);
+    
+    export_examples_BMP(images, num_examples);
 
-    Matrix* temp_M;
-    uint8_t counter = 0;
-    char filename[20];
-    while (counter < 10) {
-        int example = randint(0, (int)num_examples);
-        if (images[example].label == counter) {
-            temp_M = newMatrix(28, 28);
-            fill_from_array_M(temp_M, images[example].data_array, 28 * 28);
-
-
-            sprintf(filename, "%d.bmp", counter);
-            write_Matrix_BMP(filename, temp_M);
-            ascii_print_M(temp_M);
-            
-            freeMatrix(temp_M);
-            counter++;
+    
+    Matrix *random = newMatrix(125, 125);
+    for (unsigned int i = 0; i < random->rows; i++) {
+        for (unsigned int j = 0; j < random->columns; j++) {
+            M_index(random, i, j) = 255;
         }
     }
+    
 
-    
-   Matrix *random = newMatrix(125, 125);
-   for (unsigned int i = 0; i < random->rows; i++) {
-       for (unsigned int j = 0; j < random->columns; j++) {
-           M_index(random, i, j) = 255;
-       }
-   }
-    
+    write_Matrix_BMP("White.bmp", random);
+
+    rand_M(random, 0, 255);
 
     write_Matrix_BMP("Random.bmp", random);
 

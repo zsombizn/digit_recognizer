@@ -4,6 +4,15 @@
 #include "neural_net.h"
 #include <stdint.h>
 
+#ifdef _WIN32
+#include <direct.h>
+#define mkdir(dir, mode) _mkdir(dir)
+#else
+#include <sys/stat.h>
+#include <sys/types.h>
+#define mkdir(dir, mode) mkdir(dir, mode)
+#endif
+
 
 // Based on:
 // https://en.wikipedia.org/wiki/BMP_file_format
