@@ -11,17 +11,11 @@ void export_examples_BMP(Example *images, size_t num_examples) {
     char filename[40];
     Matrix *temp_M = newMatrix(28, 28);
 
-    if (mkdir("images", 0755) != 0) {
-        fprintf(stderr, "Failed creating directory!\n");
-        exit(EXIT_FAILURE);
-    }
+    check_mkdir("images");
 
     for (int n = 0; n < 10; n++) {
         sprintf(dirname, "images/%d", n);
-        if (mkdir(dirname, 0755) != 0) {
-            fprintf(stderr, "Failed creating directory!\n");
-            exit(EXIT_FAILURE);
-        }
+        check_mkdir(dirname);
     }
 
     for (size_t i = 0; i < num_examples; i++) {
@@ -32,7 +26,7 @@ void export_examples_BMP(Example *images, size_t num_examples) {
         write_Matrix_BMP(filename, temp_M);
         if (i % 1000 == 0) {
             putchar('#');
-            fflush(stdin);
+            fflush(stdout);
         }
 
     }
