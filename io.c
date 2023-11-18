@@ -160,7 +160,7 @@ void write_Matrix_BMP(const char *fname, Matrix *M) {
 void check_mkdir(char *path) {
     #ifdef _WIN32
         struct _stat info;
-        if (_stat(path, &info) == 0 && (info.st_mode & _S_IFDIR) != 0) {
+        if (_stat(path, &info) == 0 && (info.st_mode & _S_IFDIR) != 0 ) { 
     #else
         struct stat info;
         if (stat(path, &info) == 0 && S_ISDIR(info.st_mode)) {
