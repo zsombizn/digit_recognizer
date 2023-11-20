@@ -142,7 +142,7 @@ void demo(){
     printf("Prod---------------\n");
     print_M(Prod);
 
-    free(Prod);
+    freeMatrix(Prod);
 
     rand_M(M, 0.0, 5);
     printf("Rand----------------\n");
@@ -159,6 +159,9 @@ void demo(){
     Prod = product_M(M, Tr);
     printf("M*M-----------------\n");
     print_M(Prod);
+
+    freeMatrix(Prod);
+    freeMatrix(Tr);
 
 
     rand_M(X, 0, 50);
