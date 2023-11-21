@@ -16,7 +16,7 @@ void export_MNIST(const char* fname_images, const char *fname_labels);
 
 
 int main(int argc, char *argv[]) {
-    srand(clock());
+    srand(time(NULL));
 
     // each command line option creates a task, which is stored here, with a 
     // non zero number, which is the index in the opt_argv, where the arguments
