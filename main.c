@@ -95,7 +95,7 @@ void parse_opt(char *option, int *task_arr, int *opt_argc, char **option_argv) {
         *opt_argc += 1;
     } else if (strcmp(option, "-d") == 0 || strcmp(option, "--demo") == 0) {
         task_arr[DEMO] = *opt_argc;
-    } else if (strcmp(option, "-E") == 0 || strcmp(option, "--export-MINST") == 0) {
+    } else if (strcmp(option, "-E") == 0 || strcmp(option, "--export-MNIST") == 0) {
         task_arr[EXPORT_MNIST] = *opt_argc;
     } else if (strcmp(option, "-h") == 0 || strcmp(option, "--help") == 0) {
         task_arr[HELP] = *opt_argc;
