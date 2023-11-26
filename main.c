@@ -15,16 +15,35 @@ void demo();
 void export_MNIST(const char* fname_images, const char *fname_labels);
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     srand(time(NULL));
 
     //TEST
+    activation_f acts[] = { &ReLu, &ReLu };
+    MLP* net = newMLP(2, 2, 1, 2, acts);
 
-    MLP* net = newMLP(3, 30, 10, 4, NULL);
+    int8_t data_W[] = { 1, 1, 1, 1 };
+    fill_from_array_M(&(net->weights[0]), data_W, 4);
+
+    int8_t data_c[] = { 0, -1 };
+    fill_from_array_M(&(net->biases[0]), data_c, 2);
+
+    int8_t data_w[] = { 1, -2 };
+    fill_from_array_M(&(net->weights[1]), data_w, 2);
 
     for (int i = 0; i < net->depth; i++) {
-        printf("Layer %d: rows: %d, cols: %d\n", i, net->weights[i].rows, net->weights[i].columns);
+        printf("Weight %d: rows: %d, cols: %d\n", i, net->weights[i].rows, net->weights[i].columns);
+        printf("Bias %d: rows: %d, cols: %d\n", i, net->biases[i].rows, net->biases[i].columns);
     }
+
+    Matrix* in = newMatrix(4, 2);
+    int8_t data_x[] = { 0, 0, 0, 1, 1, 0, 1, 1 };
+
+    fill_from_array_M(in, data_x, sizeof(data_x) / sizeof(data_x[0]));
+
+    Matrix *res = feedForward(net, in);
+
+    print_M(res);
 
 
     freeMLP(net);

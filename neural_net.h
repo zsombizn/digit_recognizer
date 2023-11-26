@@ -43,15 +43,15 @@ Matrix *scalar_p_M(Matrix *A, double n);
 Matrix *transpose_M(Matrix *A);
 void sum_M(Matrix *Res, Matrix *A);
 void print_M(Matrix *A);
-void fill_from_array_M(Matrix *A, uint8_t *arr, unsigned int len);
+void fill_from_array_M(Matrix *A, int8_t *arr, unsigned int len);
 void rand_M(Matrix *A, double min, double max);
 void ascii_print_M(Matrix *A);
 MLP *newMLP(int depth, int input_size, int output_size, int hidden_layer_size, activation_f* activations);
 void freeMLP(MLP *dest);
-Matrix *feedForward(Matrix *input, Matrix *input_weights, Matrix *input_biases,
-                    Matrix *weights, Matrix *biases,
-                    Matrix *output_weights, Matrix *output_biases,
-                    int depth, int width);
+void add_row_V_M(Matrix* dest, Matrix* row_V);
+void activate_M(Matrix* dest, activation_f* a);
+Matrix* feedForward(MLP* network, Matrix* input);
+double ReLu(double x);
 
 
 #endif

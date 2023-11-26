@@ -60,8 +60,9 @@ Matrix *product_M(Matrix *A, Matrix *B) {
 
     for (unsigned int i = 0; i < Res->rows; i++) {
         for (unsigned int j = 0; j < Res->columns; j++) {
-            for (unsigned int k = 0; k < B->columns; k++) {
+            for (unsigned int k = 0; k < B->rows; k++) {
                 M_index(Res, i, j) += M_index(A, i, k) * M_index(B, k, j);
+                printf("%lf += %lf * %lf\n", M_index(Res, i, j), M_index(A, i, k), M_index(B, k, j));
             } 
         }
     }
@@ -124,7 +125,7 @@ void print_M(Matrix *A) {
 }
 
 
-void fill_from_array_M(Matrix *A, uint8_t *arr, unsigned int len) {
+void fill_from_array_M(Matrix *A, int8_t *arr, unsigned int len) {
     if (A->rows * A->columns != len) {
         fprintf(stderr, "Invalid number of elements in array!\n");
         exit(EXIT_FAILURE);
@@ -204,4 +205,78 @@ void freeMLP(MLP *dest) {
     free(dest->weights);
     free(dest->biases);
     free(dest);
+}
+
+
+// adds row vector for each row in dest
+void add_row_V_M(Matrix *dest, Matrix *row_V) {
+    if (dest->columns != row_V->columns) {
+        fprintf(stderr, "Not matching column size!\n");
+        exit(EXIT_FAILURE);
+    }
+    if (row_V->rows > 1) {
+        fprintf(stderr, "Row vector contains more than one row!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (unsigned int i = 0; i < dest->rows; i++) {
+        for (unsigned int j = 0; j < dest->columns; j++) {
+            M_index(dest, i, j) += M_index(row_V, 0, j);
+        }
+    }
+}
+
+
+// runs activation funciton on each element
+void activate_M(Matrix* dest, activation_f a) {
+    if (a == NULL) {
+        fprintf(stderr, "NULL funciton pointer!\n");
+        exit(EXIT_FAILURE);
+    }
+    if (dest == NULL) {
+        fprintf(stderr, "NULL matrix pointer!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (unsigned int i = 0; i < dest->rows; i++) {
+        for (unsigned int j = 0; j < dest->columns; j++) {
+            M_index(dest, i, j) = a( M_index(dest, i, j) );
+        }
+    }
+}
+
+
+Matrix* feedForward(MLP* network, Matrix* input) {
+    Matrix *z;
+
+    Matrix *prev_z = product_M(input, &(network->weights[0]));
+    add_row_V_M(prev_z, &(network->biases[0]));
+    activate_M(prev_z, network->activations[0]);
+    print_M(prev_z);
+    printf("----ERDEKES---V\n");
+
+    for (int i = 1; i < network->depth; i++) {
+        z = product_M(prev_z, &(network->weights[i]));
+        print_M(z);
+        printf("----\n");
+        add_row_V_M(z, &(network->biases[i]));
+        activate_M(z, network->activations[i]);
+        print_M(&(network->weights[i]));
+        printf("----\n");
+
+        freeMatrix(prev_z);
+        prev_z = z;
+    }
+
+    return z;
+}
+
+
+double ReLu(double x) {
+    if (x < 0) {
+        return 0;
+    }
+    else {
+        return x;
+    }
 }
