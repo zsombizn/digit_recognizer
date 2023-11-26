@@ -60,18 +60,12 @@ void read_MNIST_data(const char *images_fname, const char *labels_fname, Example
 
     uint8_t data;
     *images = malloc(sizeof(Example) * images_len);
-    if (*images == NULL) {
-        fprintf(stderr, "Failed allocating memory!\n");
-        exit(EXIT_FAILURE);
-    }
+    check_malloc(images);
     
     for (size_t i = 0; i < *len; i++) {
 
         (*images)[i].data_array = malloc(sizeof(uint8_t) * rows * columns);
-        if ((*images)[i].data_array == NULL) {
-            fprintf(stderr, "Failed allocating memory!\n");
-            exit(EXIT_FAILURE);
-        }
+        check_malloc((*images)[i].data_array);
 
         for (size_t k = 0; k < rows * columns; k++) {
             fread(&data, 1, 1, raw_images);

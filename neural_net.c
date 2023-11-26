@@ -6,18 +6,12 @@
 
 Matrix *newMatrix(int rows, int columns) {
     Matrix *Res = malloc(sizeof(Matrix));
-    if (Res == NULL) {
-        fprintf(stderr, "Failed allocating memory!\n");
-        exit(EXIT_FAILURE);
-    }
+    check_malloc(Res);
     Res->rows = rows;
     Res->columns = columns;
-    Res->data = malloc(sizeof(double) * rows * columns);
+    Res->data = (double *)malloc(sizeof(double) * rows * columns);
 
-    if (Res->data == NULL) {
-        fprintf(stderr, "Failed allocation!\n");
-        exit(EXIT_FAILURE);
-    }
+    check_malloc(Res->data);
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < columns; j++) {
@@ -32,12 +26,9 @@ Matrix *newMatrix(int rows, int columns) {
 void newMatrixAt(Matrix *dest, int rows, int columns) {
     dest->rows = rows;
     dest->columns = columns;
-    dest->data = malloc(sizeof(double) * rows * columns);
+    dest->data = (double *)malloc(sizeof(double) * rows * columns);
 
-    if (dest->data == NULL) {
-        fprintf(stderr, "Failed allocation!\n");
-        exit(EXIT_FAILURE);
-    }
+    check_malloc(dest->data);
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < columns; j++) {
@@ -170,4 +161,47 @@ void ascii_print_M(Matrix *A) {
         }
         putchar('\n');
     }
+}
+
+
+MLP *newMLP(int depth, int input_size, int output_size, int hidden_layer_size, activation_f* activations) {
+    MLP *Res = (MLP *)calloc(1, sizeof(MLP));
+    check_malloc(Res);
+    Res->depth = depth;
+    Res->weights = (Matrix *)calloc(depth, sizeof(Matrix));
+    Res->biases = (Matrix *)malloc(sizeof(Matrix) * depth);;
+    Res->activations = activations;
+
+
+    // matrices of the first hidden layer
+    // bias is a transposed vector
+    newMatrixAt(&(Res->weights[0]), (unsigned int)input_size, (unsigned int)hidden_layer_size);
+    newMatrixAt(&(Res->biases[0]), 1, hidden_layer_size);
+
+    // the rest of the hidden layers
+    for (int i = 1; i < depth - 1; i++) {
+        newMatrixAt(&(Res->weights[i]), (unsigned int)hidden_layer_size, (unsigned int)hidden_layer_size);
+        newMatrixAt(&(Res->biases[i]), 1, hidden_layer_size);
+    }
+
+    // output layer
+    newMatrixAt(&(Res->weights[depth - 1]), (unsigned int)hidden_layer_size, (unsigned int)output_size);
+    newMatrixAt(&(Res->biases[depth - 1]), 1, output_size);
+
+    return Res;
+}
+
+
+void freeMLP(MLP *dest) {
+    if (dest == NULL) {
+        return;
+    }
+
+    for (int i = 0; i < dest->depth; i++) {
+        free(dest->weights[i].data);
+        free(dest->biases[i].data);
+    }
+    free(dest->weights);
+    free(dest->biases);
+    free(dest);
 }

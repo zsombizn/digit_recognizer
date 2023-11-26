@@ -1,6 +1,5 @@
 #ifndef IO_H
 #define IO_H
-#pragma pack(push, 1)
 #include "neural_net.h"
 #include <stdint.h>
 
@@ -15,6 +14,7 @@
 #define mkdir(dir, mode) mkdir(dir, mode)
 #endif
 
+#pragma pack(push, 1)
 
 // Based on:
 // https://en.wikipedia.org/wiki/BMP_file_format

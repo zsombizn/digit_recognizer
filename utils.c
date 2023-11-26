@@ -1,6 +1,7 @@
 #include "utils.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 double randf(double min, double max) {
     double scale = rand() / (double) RAND_MAX;
@@ -30,5 +31,13 @@ void shuffle(void *arr, size_t size, size_t len) {
 
         // arr[i] <-> arr[n]
         swap((char*)arr + (size * i), (char*)arr + (size * n), size);
+    }
+}
+
+
+void check_malloc(void *ptr) {
+    if (ptr == NULL) {
+        fprintf(stderr, "Failed allocating memory!\n");
+        exit(EXIT_FAILURE);
     }
 }

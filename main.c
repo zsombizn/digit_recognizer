@@ -18,6 +18,20 @@ void export_MNIST(const char* fname_images, const char *fname_labels);
 int main(int argc, char *argv[]) {
     srand(time(NULL));
 
+    //TEST
+
+    MLP* net = newMLP(3, 30, 10, 4, NULL);
+
+    for (int i = 0; i < net->depth; i++) {
+        printf("Layer %d: rows: %d, cols: %d\n", i, net->weights[i].rows, net->weights[i].columns);
+    }
+
+
+    freeMLP(net);
+
+
+    //TEST
+
     // each command line option creates a task, which is stored here, with a 
     // non zero number, which is the index in the opt_argv, where the arguments
     // of the given option are stored

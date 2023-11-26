@@ -12,11 +12,27 @@ typedef struct {
 } Matrix;
 
 
-
 typedef struct {
     uint8_t label;
     uint8_t *data_array;
 } Example;
+
+
+// neural network, multi layer perceptron
+// each layers weight matrix is stored in the weights array
+// and the corresponding bias vector in the biases array
+// same with the activation functions, as function pointers in the activaiton array
+// (they must have the double func(double) prototype)
+// 
+typedef double (*activation_f)(double);
+
+
+typedef struct {
+    int depth;
+    Matrix *weights;
+    Matrix *biases;
+    activation_f* activations;
+} MLP;
 
 
 Matrix *newMatrix(int rows, int columns);
@@ -30,5 +46,12 @@ void print_M(Matrix *A);
 void fill_from_array_M(Matrix *A, uint8_t *arr, unsigned int len);
 void rand_M(Matrix *A, double min, double max);
 void ascii_print_M(Matrix *A);
+MLP *newMLP(int depth, int input_size, int output_size, int hidden_layer_size, activation_f* activations);
+void freeMLP(MLP *dest);
+Matrix *feedForward(Matrix *input, Matrix *input_weights, Matrix *input_biases,
+                    Matrix *weights, Matrix *biases,
+                    Matrix *output_weights, Matrix *output_biases,
+                    int depth, int width);
+
 
 #endif
