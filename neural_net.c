@@ -62,7 +62,6 @@ Matrix *product_M(Matrix *A, Matrix *B) {
         for (unsigned int j = 0; j < Res->columns; j++) {
             for (unsigned int k = 0; k < B->rows; k++) {
                 M_index(Res, i, j) += M_index(A, i, k) * M_index(B, k, j);
-                printf("%lf += %lf * %lf\n", M_index(Res, i, j), M_index(A, i, k), M_index(B, k, j));
             } 
         }
     }
@@ -252,17 +251,11 @@ Matrix* feedForward(MLP* network, Matrix* input) {
     Matrix *prev_z = product_M(input, &(network->weights[0]));
     add_row_V_M(prev_z, &(network->biases[0]));
     activate_M(prev_z, network->activations[0]);
-    print_M(prev_z);
-    printf("----ERDEKES---V\n");
 
     for (int i = 1; i < network->depth; i++) {
         z = product_M(prev_z, &(network->weights[i]));
-        print_M(z);
-        printf("----\n");
         add_row_V_M(z, &(network->biases[i]));
         activate_M(z, network->activations[i]);
-        print_M(&(network->weights[i]));
-        printf("----\n");
 
         freeMatrix(prev_z);
         prev_z = z;

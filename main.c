@@ -31,18 +31,19 @@ int main(int argc, char* argv[]) {
     int8_t data_w[] = { 1, -2 };
     fill_from_array_M(&(net->weights[1]), data_w, 2);
 
-    for (int i = 0; i < net->depth; i++) {
-        printf("Weight %d: rows: %d, cols: %d\n", i, net->weights[i].rows, net->weights[i].columns);
-        printf("Bias %d: rows: %d, cols: %d\n", i, net->biases[i].rows, net->biases[i].columns);
-    }
 
     Matrix* in = newMatrix(4, 2);
     int8_t data_x[] = { 0, 0, 0, 1, 1, 0, 1, 1 };
 
     fill_from_array_M(in, data_x, sizeof(data_x) / sizeof(data_x[0]));
 
+    printf("input: -------------\n");
+
+    print_M(in);
+
     Matrix *res = feedForward(net, in);
 
+    printf("output: -------------\n");
     print_M(res);
 
 

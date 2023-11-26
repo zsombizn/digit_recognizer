@@ -49,7 +49,7 @@ void ascii_print_M(Matrix *A);
 MLP *newMLP(int depth, int input_size, int output_size, int hidden_layer_size, activation_f* activations);
 void freeMLP(MLP *dest);
 void add_row_V_M(Matrix* dest, Matrix* row_V);
-void activate_M(Matrix* dest, activation_f* a);
+void activate_M(Matrix* dest, activation_f a);
 Matrix* feedForward(MLP* network, Matrix* input);
 double ReLu(double x);
 
