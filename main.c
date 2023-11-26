@@ -160,6 +160,7 @@ void demo(){
 
     fill_from_array_M(X, data_x, sizeof(data_x)/sizeof(data_x[0]));
 
+
     printf("X------------------\n");
     print_M(X);
 
@@ -243,6 +244,20 @@ void demo(){
 
 
     freeMatrix(random);
+
+
+    Matrix* X_2 = newMatrix(4, 2);
+
+    uint8_t data_x2[] = { 0, 0, 0, 1, 1, 0, 1, 1 };
+
+    fill_from_array_M(X_2, data_x2, sizeof(data_x2) / sizeof(data_x2[0]));
+
+    rand_M(X, 0, 2);
+    printf("X------------------\n");
+    print_M(X);
+    printf("X2-----------------\n");
+    print_M(X_2);
+    printf("MSE = %lf", MSE(X, X_2));
 }
 
 

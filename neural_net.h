@@ -52,6 +52,7 @@ void add_row_V_M(Matrix* dest, Matrix* row_V);
 Matrix* feedForward(MLP* network, Matrix* input);
 double ReLu(double x);
 void ReLu_M(Matrix* dest);
+double MSE(Matrix* output, Matrix* y);
 
 
 #endif
