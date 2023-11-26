@@ -164,13 +164,13 @@ void ascii_print_M(Matrix *A) {
 }
 
 
-MLP *newMLP(int depth, int input_size, int output_size, int hidden_layer_size, activation_f* activations) {
+MLP *newMLP(int depth, int input_size, int output_size, int hidden_layer_size, activation_f* activate) {
     MLP *Res = (MLP *)calloc(1, sizeof(MLP));
     check_malloc(Res);
     Res->depth = depth;
     Res->weights = (Matrix *)calloc(depth, sizeof(Matrix));
     Res->biases = (Matrix *)malloc(sizeof(Matrix) * depth);;
-    Res->activations = activations;
+    Res->activate = activate;
 
 
     // matrices of the first hidden layer
@@ -226,36 +226,18 @@ void add_row_V_M(Matrix *dest, Matrix *row_V) {
 }
 
 
-// runs activation funciton on each element
-void activate_M(Matrix* dest, activation_f a) {
-    if (a == NULL) {
-        fprintf(stderr, "NULL funciton pointer!\n");
-        exit(EXIT_FAILURE);
-    }
-    if (dest == NULL) {
-        fprintf(stderr, "NULL matrix pointer!\n");
-        exit(EXIT_FAILURE);
-    }
-
-    for (unsigned int i = 0; i < dest->rows; i++) {
-        for (unsigned int j = 0; j < dest->columns; j++) {
-            M_index(dest, i, j) = a( M_index(dest, i, j) );
-        }
-    }
-}
-
-
 Matrix* feedForward(MLP* network, Matrix* input) {
     Matrix *z;
 
     Matrix *prev_z = product_M(input, &(network->weights[0]));
     add_row_V_M(prev_z, &(network->biases[0]));
-    activate_M(prev_z, network->activations[0]);
+    network->activate[0](prev_z);
 
     for (int i = 1; i < network->depth; i++) {
         z = product_M(prev_z, &(network->weights[i]));
         add_row_V_M(z, &(network->biases[i]));
-        activate_M(z, network->activations[i]);
+        network->activate[i](z);
+        
 
         freeMatrix(prev_z);
         prev_z = z;
@@ -271,5 +253,19 @@ double ReLu(double x) {
     }
     else {
         return x;
+    }
+}
+
+
+void ReLu_M(Matrix* dest) {
+    if (dest == NULL) {
+        fprintf(stderr, "NULL matrix pointer!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (unsigned int i = 0; i < dest->rows; i++) {
+        for (unsigned int j = 0; j < dest->columns; j++) {
+            M_index(dest, i, j) = ReLu(M_index(dest, i, j));
+        }
     }
 }

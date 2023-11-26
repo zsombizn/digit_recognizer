@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
     srand(time(NULL));
 
     //TEST
-    activation_f acts[] = { &ReLu, &ReLu };
+    activation_f acts[] = { &ReLu_M, &ReLu_M };
     MLP* net = newMLP(2, 2, 1, 2, acts);
 
     int8_t data_W[] = { 1, 1, 1, 1 };

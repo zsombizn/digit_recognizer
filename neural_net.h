@@ -21,17 +21,17 @@ typedef struct {
 // neural network, multi layer perceptron
 // each layers weight matrix is stored in the weights array
 // and the corresponding bias vector in the biases array
-// same with the activation functions, as function pointers in the activaiton array
-// (they must have the double func(double) prototype)
+// same with the activation functions, as function pointers in the activate array
+// (they must have the void func(Matrix*) prototype)
 // 
-typedef double (*activation_f)(double);
+typedef void (*activation_f)(Matrix *);
 
 
 typedef struct {
     int depth;
     Matrix *weights;
     Matrix *biases;
-    activation_f* activations;
+    activation_f* activate;
 } MLP;
 
 
@@ -49,9 +49,9 @@ void ascii_print_M(Matrix *A);
 MLP *newMLP(int depth, int input_size, int output_size, int hidden_layer_size, activation_f* activations);
 void freeMLP(MLP *dest);
 void add_row_V_M(Matrix* dest, Matrix* row_V);
-void activate_M(Matrix* dest, activation_f a);
 Matrix* feedForward(MLP* network, Matrix* input);
 double ReLu(double x);
+void ReLu_M(Matrix* dest);
 
 
 #endif
