@@ -43,10 +43,14 @@ typedef struct {
 
 } BITPMAPINFOHEADER;
 
+#pragma pack(pop)
+
 void msb_to_lsb(void *target, size_t size);
 void read_MNIST_data(const char *images_fname, const char *labels_fname, Example **images, size_t *len);
 void write_Matrix_BMP(const char *fname, Matrix *M);
 void check_mkdir(char *path);
+void write_MLP(char *fname, MLP *model);
+MLP *read_MLP(char *fname);
 
-#pragma pack(pop)
+
 #endif

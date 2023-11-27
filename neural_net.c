@@ -176,6 +176,7 @@ MLP *newMLP(int depth, int input_size, int hidden_layer_size, int output_size, a
     Res->activate = activate;
 
 
+
     // matrices of the first hidden layer
     // bias is a transposed vector
     newMatrixAt(&(Res->weights[0]), (unsigned int)input_size, (unsigned int)hidden_layer_size);

@@ -35,6 +35,9 @@ typedef struct {
 } MLP;
 
 
+enum activation_function {A_ReLu};
+
+
 Matrix *newMatrix(int rows, int columns);
 void newMatrixAt(Matrix *dest, int rows, int columns);
 void freeMatrix(Matrix *dest);

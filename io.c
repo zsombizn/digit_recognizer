@@ -151,6 +151,7 @@ void write_Matrix_BMP(const char *fname, Matrix *M) {
     
 }
 
+
 void check_mkdir(char *path) {
     #ifdef _WIN32
         struct _stat info;
@@ -165,4 +166,110 @@ void check_mkdir(char *path) {
         exit(EXIT_FAILURE);
     }
 
+}
+
+
+int encode_activation(activation_f f) {
+    if (f == &ReLu_M) {
+        return A_ReLu;
+    } else {
+        return -1;
+    }
+}
+
+
+activation_f decode_activation(int f) {
+    switch (f) {
+    case A_ReLu:
+        return &ReLu_M;
+        break;
+    
+    default:
+        return NULL;
+        break;
+    }
+}
+
+
+// MLP *newMLP(int depth, int input_size, int hidden_layer_size, int output_size, activation_f* activate)
+void write_MLP(char *fname, MLP *model) {
+    FILE *fp = fopen(fname, "wb");
+    int encoded_activation;
+
+    // depth
+    fwrite(&(model->depth), sizeof(int), 1, fp);
+
+    // input size
+    fwrite(&(model->weights[0].rows), sizeof(unsigned int), 1, fp);
+
+    // hidden_layer size
+    fwrite(&(model->weights[0].columns), sizeof(unsigned int), 1, fp);
+
+    // output size
+    fwrite(&(model->weights[model->depth-1].columns), sizeof(unsigned int), 1, fp);
+
+    // activation functions
+    for (int i = 0; i < model->depth; i++) {
+        encoded_activation = encode_activation(model->activate[i]);
+        fwrite(&encoded_activation, sizeof(int), 1, fp);
+    }
+
+    // weights
+    for (int i = 0; i < model->depth; i++) {
+        fwrite(model->weights[i].data, sizeof(double), model->weights[i].rows * model->weights[i].columns, fp);
+    }
+
+    // biases
+    for (int i = 0; i < model->depth; i++) {
+        fwrite(model->biases[i].data, sizeof(double), model->biases[i].rows * model->biases[i].columns, fp);
+    }
+
+    fclose(fp);
+}
+
+
+MLP *read_MLP(char *fname) {
+    FILE *fp = fopen(fname, "rb");
+    int encoded_activation;
+    int depth, input_size, hidden_layer_size, output_size;
+    activation_f* activate;
+
+    MLP *Res;
+
+    // depth
+    fread(&depth, sizeof(int), 1, fp);
+
+    activate = malloc(sizeof(activation_f) * depth);
+    check_malloc(activate);
+
+    // input size
+    fread(&input_size, sizeof(int), 1, fp);
+
+    // hidden_layer size
+    fread(&hidden_layer_size, sizeof(int), 1, fp);
+
+    // output size
+    fread(&output_size, sizeof(int), 1, fp);
+
+    // activation functions
+    for (int i = 0; i < depth; i++) {
+        fread(&encoded_activation, sizeof(int), 1, fp);
+        activate[i] = decode_activation(encoded_activation);
+    }
+
+    Res = newMLP(depth, input_size, hidden_layer_size, output_size, activate);
+
+    // weights
+    for (int i = 0; i < depth; i++) {
+        fread(Res->weights[i].data, sizeof(double), Res->weights[i].rows * Res->weights[i].columns, fp);
+    }
+
+    // biases
+    for (int i = 0; i < depth; i++) {
+        fread(Res->biases[i].data, sizeof(double), Res->biases[i].rows * Res->biases[i].columns, fp);
+    }
+
+    fclose(fp);
+
+    return Res;
 }

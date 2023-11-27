@@ -121,6 +121,18 @@ void demo(){
     printf("\noutput------------\n");
     print_M(res);
 
+    write_MLP("xor.bin", net);
+
+    MLP *readed = read_MLP("xor.bin");
+
+    freeMatrix(res);
+
+    res = feedForward(readed, in);
+
+    printf("\noutput2-----------\n");
+    print_M(res);
+
+
     freeMatrix(in);
     freeMatrix(res);
     freeMLP(net);
