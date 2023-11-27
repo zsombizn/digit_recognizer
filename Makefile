@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -g
+CFLAGS = -Wall -Wextra -g -lm
 TARGET = digit_recognizer
 OBJ_DIR = obj
 

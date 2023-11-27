@@ -168,6 +168,10 @@ void demo(){
 
     freeMatrix(Prod);
 
+    printf("\nSoftmax-X---------\n");
+    soft_max_M(X);
+    print_M(X);
+
     rand_M(M, 0.0, 5);
     printf("\nRand--------------\n");
     
@@ -235,6 +239,9 @@ void demo(){
 
 
     freeMatrix(random);
+
+    double rand_x = randf(0, 1);
+    printf("\nsigmoid %lf: %lf\n", rand_x, sigmoid(rand_x));
 }
 
 

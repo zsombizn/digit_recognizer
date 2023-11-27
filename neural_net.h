@@ -35,7 +35,7 @@ typedef struct {
 } MLP;
 
 
-enum activation_function {A_ReLu};
+enum activation_function {ReLu_CODE, sigmoid_CODE, softmax_CODE};
 
 
 Matrix *newMatrix(int rows, int columns);
@@ -55,6 +55,9 @@ void add_row_V_M(Matrix* dest, Matrix* row_V);
 Matrix* feedForward(MLP* network, Matrix* input);
 double ReLu(double x);
 void ReLu_M(Matrix* dest);
+double sigmoid(double x);
+void sigmoid_M(Matrix *dest);
+void soft_max_M(Matrix *dest);
 double MSE(Matrix* output, Matrix* y);
 
 

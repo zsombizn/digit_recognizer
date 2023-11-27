@@ -171,7 +171,11 @@ void check_mkdir(char *path) {
 
 int encode_activation(activation_f f) {
     if (f == &ReLu_M) {
-        return A_ReLu;
+        return ReLu_CODE;
+    } else if(f == &sigmoid_M) {
+        return sigmoid_CODE;
+    } else if(f == &soft_max_M) {
+        return softmax_CODE;
     } else {
         return -1;
     }
@@ -180,10 +184,15 @@ int encode_activation(activation_f f) {
 
 activation_f decode_activation(int f) {
     switch (f) {
-    case A_ReLu:
+    case ReLu_CODE:
         return &ReLu_M;
-        break;
-    
+
+    case sigmoid_CODE:
+        return &sigmoid_M;
+
+    case softmax_CODE:
+        return &soft_max_M;
+
     default:
         return NULL;
         break;

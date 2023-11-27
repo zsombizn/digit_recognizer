@@ -2,6 +2,7 @@
 #include "utils.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 
 Matrix *newMatrix(int rows, int columns) {
@@ -271,6 +272,45 @@ void ReLu_M(Matrix* dest) {
         for (unsigned int j = 0; j < dest->columns; j++) {
             M_index(dest, i, j) = ReLu(M_index(dest, i, j));
         }
+    }
+}
+
+
+double sigmoid(double x) {
+    return 1 / (double)(1 + exp(-x));
+}
+
+
+void sigmoid_M(Matrix *dest) {
+    if (dest == NULL) {
+        fprintf(stderr, "NULL matrix pointer!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (unsigned int i = 0; i < dest->rows; i++) {
+        for (unsigned int j = 0; j < dest->columns; j++) {
+            M_index(dest, i, j) = sigmoid(M_index(dest, i, j));
+        }
+    }
+}
+
+
+void soft_max_M(Matrix *dest) {
+    if (dest == NULL) {
+        fprintf(stderr, "NULL matrix pointer!\n");
+        exit(EXIT_FAILURE);
+    }
+    double sum = 0.0;
+
+    for (unsigned int i = 0; i < dest->rows; i++) {
+        for (unsigned int j = 0; j < dest->columns; j++) {
+            M_index(dest, i, j) = exp(M_index(dest, i, j));
+            sum += M_index(dest, i, j);
+        }
+        for (unsigned int j = 0; j < dest->columns; j++) {
+            M_index(dest, i, j) = M_index(dest, i, j) / sum;
+        }
+        sum = 0.0;
     }
 }
 
