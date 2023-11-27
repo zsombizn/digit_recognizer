@@ -18,40 +18,6 @@ void export_MNIST(const char* fname_images, const char *fname_labels);
 int main(int argc, char* argv[]) {
     srand(time(NULL));
 
-    //TEST
-    activation_f acts[] = { &ReLu_M, &ReLu_M };
-    MLP* net = newMLP(2, 2, 1, 2, acts);
-
-    int8_t data_W[] = { 1, 1, 1, 1 };
-    fill_from_array_M(&(net->weights[0]), data_W, 4);
-
-    int8_t data_c[] = { 0, -1 };
-    fill_from_array_M(&(net->biases[0]), data_c, 2);
-
-    int8_t data_w[] = { 1, -2 };
-    fill_from_array_M(&(net->weights[1]), data_w, 2);
-
-
-    Matrix* in = newMatrix(4, 2);
-    int8_t data_x[] = { 0, 0, 0, 1, 1, 0, 1, 1 };
-
-    fill_from_array_M(in, data_x, sizeof(data_x) / sizeof(data_x[0]));
-
-    printf("input: -------------\n");
-
-    print_M(in);
-
-    Matrix *res = feedForward(net, in);
-
-    printf("output: -------------\n");
-    print_M(res);
-
-
-    freeMLP(net);
-
-
-    //TEST
-
     // each command line option creates a task, which is stored here, with a 
     // non zero number, which is the index in the opt_argv, where the arguments
     // of the given option are stored
@@ -93,35 +59,6 @@ int main(int argc, char* argv[]) {
 }
 
 
-void export_examples_BMP(Example *images, size_t num_examples) {
-    char dirname[10];
-    char filename[40];
-    Matrix *temp_M = newMatrix(28, 28);
-
-    check_mkdir("images");
-
-    for (int n = 0; n < 10; n++) {
-        sprintf(dirname, "images/%d", n);
-        check_mkdir(dirname);
-    }
-
-    for (size_t i = 0; i < num_examples; i++) {
-        sprintf(filename, "images/%d/%d.bmp", images[i].label, i);
-
-        fill_from_array_M(temp_M, images[i].data_array, 28 * 28);
-
-        write_Matrix_BMP(filename, temp_M);
-        if (i % 1000 == 0) {
-            putchar('#');
-            fflush(stdout);
-        }
-
-    }
-    putchar('\n');
-    free(temp_M);
-}
-
-
 void parse_opt(char *option, int *task_arr, int *opt_argc, char **option_argv) {
     if (option[0] != '-') {
         option_argv[*opt_argc] = malloc(sizeof(char) * strlen(option) + 1);
@@ -149,115 +86,172 @@ void print_help(const char* exec_name) {
 
 
 void demo(){
-    Matrix *M = newMatrix(8, 1);
 
-    print_M(M);
+    printf("WIP -- demo operations\n");
+    printf("MLP implementation of XOR with preset weigths and biases:\n");
 
-    Matrix *X = newMatrix(4, 2);
-    Matrix *W = newMatrix(2, 2);
+    // 3 layers, input 2, hidden 2, output 1,
+    activation_f acts[] = {&ReLu_M, &ReLu_M};
+    MLP* net = newMLP(2, 2, 2, 1, acts);
 
-    uint8_t data_x[] = {0, 0, 0, 1, 1, 0, 1, 1};
+    // hidden layer weights and biases
+    double data_W[] = {1.0, 1.0, 1.0, 1.0};
+    fill_from_array_M(&(net->weights[0]), data_W, 4);
 
-    fill_from_array_M(X, data_x, sizeof(data_x)/sizeof(data_x[0]));
+    double data_c[] = {0.0, -1.0};
+    fill_from_array_M(&(net->biases[0]), data_c, 2);
+
+    // output layer weights (0 for biases)
+    double data_w[] = {1.0, -2.0};
+    fill_from_array_M(&(net->weights[1]), data_w, 2);
 
 
-    printf("X------------------\n");
-    print_M(X);
+    // input data
+    Matrix* in = newMatrix(4, 2);
+    double data_x[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
+
+    fill_from_array_M(in, data_x, sizeof(data_x) / sizeof(data_x[0]));
+
+    printf("input:\n");
+
+    print_M(in);
+
+    Matrix *res = feedForward(net, in);
+
+    printf("output:\n");
+    print_M(res);
+
+    freeMatrix(in);
+    freeMatrix(res);
+    freeMLP(net);
+    // Matrix *M = newMatrix(8, 1);
+
+    // print_M(M);
+
+    // Matrix *X = newMatrix(4, 2);
+    // Matrix *W = newMatrix(2, 2);
+
+    // uint8_t data_x[] = {0, 0, 0, 1, 1, 0, 1, 1};
+
+    // fill_from_array_M(X, data_x, sizeof(data_x)/sizeof(data_x[0]));
+
+    // printf("X------------------\n");
+    // print_M(X);
 
 
-    uint8_t data_w[] = {1, 1, 1, 1};
+    // uint8_t data_w[] = {1, 1, 1, 1};
 
-    fill_from_array_M(W, data_w, sizeof(data_w)/sizeof(data_w[0]));
+    // fill_from_array_M(W, data_w, sizeof(data_w)/sizeof(data_w[0]));
 
-    printf("W------------------\n");
-    print_M(W);
+    // printf("W------------------\n");
+    // print_M(W);
 
-    Matrix *Prod = product_M(X, W);
+    // Matrix *Prod = product_M(X, W);
 
-    printf("Prod---------------\n");
-    print_M(Prod);
+    // printf("Prod---------------\n");
+    // print_M(Prod);
 
-    freeMatrix(Prod);
+    // freeMatrix(Prod);
 
-    rand_M(M, 0.0, 5);
-    printf("Rand----------------\n");
+    // rand_M(M, 0.0, 5);
+    // printf("Rand----------------\n");
     
-    print_M(M);
+    // print_M(M);
 
-    fill_from_array_M(M, data_x, sizeof(data_x)/sizeof(data_x[0]));
-    Matrix *Tr = transpose_M(M);
-    printf("Tr------------------\n");
+    // fill_from_array_M(M, data_x, sizeof(data_x)/sizeof(data_x[0]));
+    // Matrix *Tr = transpose_M(M);
+    // printf("Tr------------------\n");
 
-    print_M(Tr);
+    // print_M(Tr);
 
     
-    Prod = product_M(M, Tr);
-    printf("M*M-----------------\n");
-    print_M(Prod);
+    // Prod = product_M(M, Tr);
+    // printf("M*M-----------------\n");
+    // print_M(Prod);
 
-    freeMatrix(Prod);
-    freeMatrix(Tr);
-
-
-    rand_M(X, 0, 50);
-    printf("X------------------\n");
-    print_M(X);
-    sum_M(X, X);
-    printf("X+X-----------------\n");
-    print_M(X);
+    // freeMatrix(Prod);
+    // freeMatrix(Tr);
 
 
-    Matrix *Scalar_p = scalar_p_M(X, 3.14); 
-    printf("Scalar_p--3.14------\n");
-    print_M(Scalar_p);
+    // rand_M(X, 0, 50);
+    // printf("X------------------\n");
+    // print_M(X);
+    // sum_M(X, X);
+    // printf("X+X-----------------\n");
+    // print_M(X);
 
-    printf("Random int: %d, %d, %d\n", randint(1, 5), randint(5, 10), randint(6, 7));
 
-    size_t len = 3;
-    int *arr = malloc(sizeof(int) * len);
+    // Matrix *Scalar_p = scalar_p_M(X, 3.14); 
+    // printf("Scalar_p--3.14------\n");
+    // print_M(Scalar_p);
 
-    arr[0] = 2;
-    arr[1] = 1;
-    arr[2] = 0;
+    // printf("Random int: %d, %d, %d\n", randint(1, 5), randint(5, 10), randint(6, 7));
 
-    swap(&arr[0], &arr[2], sizeof(int));
+    // size_t len = 3;
+    // int *arr = malloc(sizeof(int) * len);
 
-    printf("swapped: %d %d %d\n", arr[0], arr[1], arr[2]);
+    // arr[0] = 2;
+    // arr[1] = 1;
+    // arr[2] = 0;
 
-    shuffle(arr, sizeof(int), len);
+    // swap(&arr[0], &arr[2], sizeof(int));
 
-    printf("shuffled: %d %d %d\n", arr[0], arr[1], arr[2]);
+    // printf("swapped: %d %d %d\n", arr[0], arr[1], arr[2]);
 
-    Matrix *random = newMatrix(125, 125);
-    for (unsigned int i = 0; i < random->rows; i++) {
-        for (unsigned int j = 0; j < random->columns; j++) {
-            M_index(random, i, j) = 255;
-        }
+    // shuffle(arr, sizeof(int), len);
+
+    // printf("shuffled: %d %d %d\n", arr[0], arr[1], arr[2]);
+
+    // Matrix *random = newMatrix(125, 125);
+    // for (unsigned int i = 0; i < random->rows; i++) {
+    //     for (unsigned int j = 0; j < random->columns; j++) {
+    //         M_index(random, i, j) = 255;
+    //     }
+    // }
+    
+
+    // write_Matrix_BMP("White.bmp", random);
+
+    // rand_M(random, 0, 255);
+
+    // write_Matrix_BMP("Random.bmp", random);
+
+
+    // freeMatrix(random);
+}
+
+
+void export_examples_BMP(Example *images, size_t num_examples) {
+    char dirname[10];
+    char filename[40];
+    Matrix *temp_M = newMatrix(28, 28);
+    double *data = malloc(sizeof(double)*28*28);
+    check_malloc(data);
+
+    check_mkdir("images");
+
+    for (int n = 0; n < 10; n++) {
+        sprintf(dirname, "images/%d", n);
+        check_mkdir(dirname);
     }
-    
 
-    write_Matrix_BMP("White.bmp", random);
+    for (size_t i = 0; i < num_examples; i++) {
+        sprintf(filename, "images/%d/%d.bmp", images[i].label, (int) i);
 
-    rand_M(random, 0, 255);
+        uint8_to_double(data, images[i].data_array, 28*28);
 
-    write_Matrix_BMP("Random.bmp", random);
+        fill_from_array_M(temp_M, data, 28 * 28);
 
+        write_Matrix_BMP(filename, temp_M);
+        if (i % 1000 == 0) {
+            putchar('#');
+            fflush(stdout);
+        }
 
-    freeMatrix(random);
-
-
-    Matrix* X_2 = newMatrix(4, 2);
-
-    uint8_t data_x2[] = { 0, 0, 0, 1, 1, 0, 1, 1 };
-
-    fill_from_array_M(X_2, data_x2, sizeof(data_x2) / sizeof(data_x2[0]));
-
-    rand_M(X, 0, 2);
-    printf("X------------------\n");
-    print_M(X);
-    printf("X2-----------------\n");
-    print_M(X_2);
-    printf("MSE = %lf", MSE(X, X_2));
+    }
+    putchar('\n');
+    free(temp_M);
+    free(data);
 }
 
 

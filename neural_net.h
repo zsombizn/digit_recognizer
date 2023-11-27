@@ -46,7 +46,7 @@ void print_M(Matrix *A);
 void fill_from_array_M(Matrix *A, double *arr, unsigned int len);
 void rand_M(Matrix *A, double min, double max);
 void ascii_print_M(Matrix *A);
-MLP *newMLP(int depth, int input_size, int output_size, int hidden_layer_size, activation_f* activations);
+MLP *newMLP(int depth, int input_size, int hidden_layer_size, int output_size, activation_f* activate);
 void freeMLP(MLP *dest);
 void add_row_V_M(Matrix* dest, Matrix* row_V);
 Matrix* feedForward(MLP* network, Matrix* input);

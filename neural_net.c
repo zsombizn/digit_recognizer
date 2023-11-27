@@ -117,9 +117,12 @@ void sum_M(Matrix *Res, Matrix *A) {
 void print_M(Matrix *A) {
     for (unsigned int i = 0; i < A->rows; i++) {
         for (unsigned int j = 0; j < A->columns; j++) {
-            printf("%lf, ", M_index(A, i, j));
+            printf("%lf", M_index(A, i, j));
+            if (j != A->columns - 1) {
+                printf(", ");
+            }
         }
-        printf("\n");
+        putchar('\n');
     }
 }
 
@@ -164,7 +167,7 @@ void ascii_print_M(Matrix *A) {
 }
 
 
-MLP *newMLP(int depth, int input_size, int output_size, int hidden_layer_size, activation_f* activate) {
+MLP *newMLP(int depth, int input_size, int hidden_layer_size, int output_size, activation_f* activate) {
     MLP *Res = (MLP *)calloc(1, sizeof(MLP));
     check_malloc(Res);
     Res->depth = depth;
