@@ -124,7 +124,7 @@ void print_M(Matrix *A) {
 }
 
 
-void fill_from_array_M(Matrix *A, int8_t *arr, unsigned int len) {
+void fill_from_array_M(Matrix *A, double *arr, unsigned int len) {
     if (A->rows * A->columns != len) {
         fprintf(stderr, "Invalid number of elements in array!\n");
         exit(EXIT_FAILURE);
