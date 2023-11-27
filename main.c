@@ -95,129 +95,134 @@ void demo(){
     MLP* net = newMLP(2, 2, 2, 1, acts);
 
     // hidden layer weights and biases
-    double data_W[] = {1.0, 1.0, 1.0, 1.0};
-    fill_from_array_M(&(net->weights[0]), data_W, 4);
+    double data_w0[] = {1.0, 1.0, 1.0, 1.0};
+    fill_from_array_M(&(net->weights[0]), data_w0, 4);
 
-    double data_c[] = {0.0, -1.0};
-    fill_from_array_M(&(net->biases[0]), data_c, 2);
+    double data_b0[] = {0.0, -1.0};
+    fill_from_array_M(&(net->biases[0]), data_b0, 2);
 
     // output layer weights (0 for biases)
-    double data_w[] = {1.0, -2.0};
-    fill_from_array_M(&(net->weights[1]), data_w, 2);
+    double data_w1[] = {1.0, -2.0};
+    fill_from_array_M(&(net->weights[1]), data_w1, 2);
 
 
     // input data
     Matrix* in = newMatrix(4, 2);
-    double data_x[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
+    double data_in[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 
-    fill_from_array_M(in, data_x, sizeof(data_x) / sizeof(data_x[0]));
+    fill_from_array_M(in, data_in, sizeof(data_in) / sizeof(data_in[0]));
 
-    printf("input:\n");
+    printf("\ninput-------------\n");
 
     print_M(in);
 
     Matrix *res = feedForward(net, in);
 
-    printf("output:\n");
+    printf("\noutput------------\n");
     print_M(res);
 
     freeMatrix(in);
     freeMatrix(res);
     freeMLP(net);
-    // Matrix *M = newMatrix(8, 1);
 
-    // print_M(M);
+    // demonstration of matrix operations:
+    printf("\nNew matrix M------\n");
 
-    // Matrix *X = newMatrix(4, 2);
-    // Matrix *W = newMatrix(2, 2);
+    Matrix *M = newMatrix(8, 1);
+    print_M(M);
 
-    // uint8_t data_x[] = {0, 0, 0, 1, 1, 0, 1, 1};
+    Matrix *X = newMatrix(4, 2);
+    Matrix *W = newMatrix(2, 2);
 
-    // fill_from_array_M(X, data_x, sizeof(data_x)/sizeof(data_x[0]));
+    double data_x[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 
-    // printf("X------------------\n");
-    // print_M(X);
+    fill_from_array_M(X, data_x, sizeof(data_x)/sizeof(data_x[0]));
+
+    printf("\nX-----------------\n");
+    print_M(X);
 
 
-    // uint8_t data_w[] = {1, 1, 1, 1};
+    double data_w[] = {1.0, 1.0, 1.0, 1.0};
 
-    // fill_from_array_M(W, data_w, sizeof(data_w)/sizeof(data_w[0]));
+    fill_from_array_M(W, data_w, sizeof(data_w)/sizeof(data_w[0]));
 
-    // printf("W------------------\n");
-    // print_M(W);
+    printf("\nW-----------------\n");
+    print_M(W);
 
-    // Matrix *Prod = product_M(X, W);
+    Matrix *Prod = product_M(X, W);
 
-    // printf("Prod---------------\n");
-    // print_M(Prod);
+    printf("\nProduct-----------\n");
+    print_M(Prod);
 
-    // freeMatrix(Prod);
+    freeMatrix(Prod);
 
-    // rand_M(M, 0.0, 5);
-    // printf("Rand----------------\n");
+    rand_M(M, 0.0, 5);
+    printf("\nRand--------------\n");
     
-    // print_M(M);
+    print_M(M);
 
-    // fill_from_array_M(M, data_x, sizeof(data_x)/sizeof(data_x[0]));
-    // Matrix *Tr = transpose_M(M);
-    // printf("Tr------------------\n");
+    fill_from_array_M(M, data_x, sizeof(data_x)/sizeof(data_x[0]));
+    Matrix *Tr = transpose_M(M);
+    printf("\nTr----------------\n");
 
-    // print_M(Tr);
+    print_M(Tr);
 
     
-    // Prod = product_M(M, Tr);
-    // printf("M*M-----------------\n");
-    // print_M(Prod);
+    Prod = product_M(M, Tr);
+    printf("\nM*M----------------\n");
+    print_M(Prod);
 
-    // freeMatrix(Prod);
-    // freeMatrix(Tr);
-
-
-    // rand_M(X, 0, 50);
-    // printf("X------------------\n");
-    // print_M(X);
-    // sum_M(X, X);
-    // printf("X+X-----------------\n");
-    // print_M(X);
+    freeMatrix(Prod);
+    freeMatrix(Tr);
 
 
-    // Matrix *Scalar_p = scalar_p_M(X, 3.14); 
-    // printf("Scalar_p--3.14------\n");
-    // print_M(Scalar_p);
+    rand_M(X, 0, 50);
+    printf("\nX------------------\n");
+    print_M(X);
+    sum_M(X, X);
+    printf("\nX+X----------------\n");
+    print_M(X);
 
-    // printf("Random int: %d, %d, %d\n", randint(1, 5), randint(5, 10), randint(6, 7));
 
-    // size_t len = 3;
-    // int *arr = malloc(sizeof(int) * len);
+    Matrix *Scalar_p = scalar_p_M(X, 3.14); 
+    printf("\nScalar_p--3.14-----\n");
+    print_M(Scalar_p);
 
-    // arr[0] = 2;
-    // arr[1] = 1;
-    // arr[2] = 0;
+    printf("\nRandom int: %d, %d, %d\n", randint(1, 5), randint(5, 10), randint(6, 7));
 
-    // swap(&arr[0], &arr[2], sizeof(int));
+    size_t len = 3;
+    int *arr = malloc(sizeof(int) * len);
 
-    // printf("swapped: %d %d %d\n", arr[0], arr[1], arr[2]);
+    arr[0] = 2;
+    arr[1] = 1;
+    arr[2] = 0;
 
-    // shuffle(arr, sizeof(int), len);
+    swap(&arr[0], &arr[2], sizeof(int));
 
-    // printf("shuffled: %d %d %d\n", arr[0], arr[1], arr[2]);
+    printf("\nswapped: %d %d %d\n", arr[0], arr[1], arr[2]);
 
-    // Matrix *random = newMatrix(125, 125);
-    // for (unsigned int i = 0; i < random->rows; i++) {
-    //     for (unsigned int j = 0; j < random->columns; j++) {
-    //         M_index(random, i, j) = 255;
-    //     }
-    // }
+    shuffle(arr, sizeof(int), len);
+
+    printf("\nshuffled: %d %d %d\n", arr[0], arr[1], arr[2]);
+
+    printf("\nWriting 'White.bmp'\n");
+    Matrix *random = newMatrix(125, 125);
+    for (unsigned int i = 0; i < random->rows; i++) {
+        for (unsigned int j = 0; j < random->columns; j++) {
+            M_index(random, i, j) = 255;
+        }
+    }
     
 
-    // write_Matrix_BMP("White.bmp", random);
+    write_Matrix_BMP("White.bmp", random);
 
-    // rand_M(random, 0, 255);
+    printf("\nWriting 'Random.bmp'\n");
+    rand_M(random, 0, 255);
 
-    // write_Matrix_BMP("Random.bmp", random);
+    write_Matrix_BMP("Random.bmp", random);
 
 
-    // freeMatrix(random);
+    freeMatrix(random);
 }
 
 
