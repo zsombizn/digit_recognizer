@@ -5,6 +5,9 @@
 #include <stdint.h>
 
 
+/**
+ * @brief Structure representing a matrix.
+ */
 typedef struct {
     unsigned int rows;
     unsigned int columns;
@@ -12,29 +15,44 @@ typedef struct {
 } Matrix;
 
 
+/**
+ * @brief Structure representing an example.
+ */
 typedef struct {
-    uint8_t label;
-    uint8_t *data_array;
+    uint8_t label;        /**< Label associated with the example. */
+    uint8_t *data_array;  /**< Array containing data for the examples features. */
 } Example;
 
 
-// neural network, multi layer perceptron
-// each layers weight matrix is stored in the weights array
-// and the corresponding bias vector in the biases array
-// same with the activation functions, as function pointers in the activate array
-// (they must have the void func(Matrix*) prototype)
-// 
+/**
+ * @brief Activation function type for neural networks.
+ *
+ * Function pointers with the prototype `void func(Matrix*)` are used to represent activation functions.
+ */
 typedef void (*activation_f)(Matrix *);
 
 
+/**
+ * @brief Structure representing a Multi-Layer Perceptron (MLP).
+ *
+ * Each layer's weight matrix is stored in the weights array,
+ * the corresponding bias vector in the biases array,
+ * and the activation function as function pointers in the activate array.
+ */
 typedef struct {
-    int depth;
-    Matrix *weights;
-    Matrix *biases;
-    activation_f* activate;
+    int depth;               /**< Number of layers in the MLP. (Excluding input layer)*/
+    Matrix *weights;         /**< Array of weight matrices for each layer. */
+    Matrix *biases;          /**< Array of bias vectors for each layer. */
+    activation_f* activate;  /**< Array of activation functions for each layer. */
 } MLP;
 
 
+/**
+ * @brief Enumeration representing activation functions for neural networks.
+ * 
+ * These are used to encode activation functions as integers, this way
+ * they can be stored in binary files, independent of the function pointer values.
+ */
 enum activation_function {ReLu_CODE, sigmoid_CODE, softmax_CODE};
 
 

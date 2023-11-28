@@ -19,28 +19,33 @@
 // Based on:
 // https://en.wikipedia.org/wiki/BMP_file_format
 
+
+/**
+ * @brief Structure representing the header of a BMP file.
+ */
 typedef struct {
-    uint16_t signature;          // header field used to identify the BMP and DIB file is 0x42 0x4D in hexadecimal, same as BM in ASCII.
-    uint32_t fileSize;           // size of the BMP file in bytes.
-    uint16_t reserved1;
-    uint16_t reserved2;
-    uint32_t offset;             // offset, i.e. starting address, of the byte where the bitmap image data (pixel array) can be found.
+    uint16_t signature;  /**< Header field used to identify the BMP and DIB file (0x42 0x4D in hexadecimal). */
+    uint32_t fileSize;   /**< Size of the BMP file in bytes. */
+    uint16_t reserved1;  /**< Reserved field (not used). */
+    uint16_t reserved2;  /**< Reserved field (not used). */
+    uint32_t offset;     /**< Offset, i.e., starting address, of the byte where the bitmap image data (pixel array) can be found. */
 } BMP_HEADER;
 
-
+/**
+ * @brief Structure representing the header information of a BMP file.
+ */
 typedef struct {
-    uint32_t header_size;        // size of this header, in bytes (40)
-    int32_t width;               // bitmap width in pixels (signed integer)
-    int32_t height;              // bitmap height in pixels (signed integer) 
-    uint16_t color_planes;       // number of color planes (must be 1)
-    uint16_t depth;              // number of bits per pixel, which is the color depth of the image.
-    uint32_t compression;        // compression method being used.
-    uint32_t image_size;         // image size. This is the size of the raw bitmap data
-    int32_t horizontal_res;      // horizontal resolution of the image. (pixel per metre, signed integer)
-    int32_t vertical_res;        // vertical resolution of the image. (pixel per metre, signed integer)
-    uint32_t color_palette;      // number of colors in the color palette, or 0 to default to 2^n
-    uint32_t important_colors;   // number of important colors used, or 0 when every color is important; generally ignored 
-
+    uint32_t header_size;        /**< Size of this header, in bytes (40). */
+    int32_t width;               /**< Bitmap width in pixels (signed integer). */
+    int32_t height;              /**< Bitmap height in pixels (signed integer). */
+    uint16_t color_planes;       /**< Number of color planes (must be 1). */
+    uint16_t depth;              /**< Number of bits per pixel, which is the color depth of the image. */
+    uint32_t compression;        /**< Compression method being used. */
+    uint32_t image_size;         /**< Image size. This is the size of the raw bitmap data. */
+    int32_t horizontal_res;      /**< Horizontal resolution of the image (pixels per meter, signed integer). */
+    int32_t vertical_res;        /**< Vertical resolution of the image (pixels per meter, signed integer). */
+    uint32_t color_palette;      /**< Number of colors in the color palette, or 0 to default to 2^n. */
+    uint32_t important_colors;   /**< Number of important colors used, or 0 when every color is important (generally ignored). */
 } BITPMAPINFOHEADER;
 
 #pragma pack(pop)

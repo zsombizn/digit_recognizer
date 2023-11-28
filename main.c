@@ -6,6 +6,9 @@
 #include <time.h>
 #include <string.h>
 
+/**
+ * @brief Enumeration representing different tasks that can be performed by the program.
+ */
 enum task {HELP, DEMO, EXPORT_MNIST};
 
 void export_examples_BMP(Example *images, size_t num_examples);
@@ -59,6 +62,14 @@ int main(int argc, char* argv[]) {
 }
 
 
+/**
+ * @brief Parse command line options and set corresponding tasks.
+ *
+ * @param option Command line option to be parsed.
+ * @param task_arr Array to store the tasks. Each task is associated with an index in opt_argv.
+ * @param opt_argc Pointer to the index of opt_argv to store the option arguments.
+ * @param option_argv Array to store the option arguments.
+ */
 void parse_opt(char *option, int *task_arr, int *opt_argc, char **option_argv) {
     if (option[0] != '-') {
         option_argv[*opt_argc] = malloc(sizeof(char) * strlen(option) + 1);
@@ -77,6 +88,11 @@ void parse_opt(char *option, int *task_arr, int *opt_argc, char **option_argv) {
 }
 
 
+/**
+ * @brief Display help information.
+ *
+ * @param exec_name Name of the executable.
+ */
 void print_help(const char* exec_name) {
     printf("Usage: %s [OPTION]...\n", exec_name);
     printf("Options:\n   -h, --help: Print this message\n");
@@ -85,6 +101,9 @@ void print_help(const char* exec_name) {
 }
 
 
+/**
+ * @brief Run a demonstration of implemented functions.
+ */
 void demo(){
 
     printf("WIP -- demo operations\n");
@@ -245,6 +264,12 @@ void demo(){
 }
 
 
+/**
+ * @brief Export BMP images for MNIST data.
+ *
+ * @param images Array of Example structures containing image data.
+ * @param num_examples Number of examples in the array.
+ */
 void export_examples_BMP(Example *images, size_t num_examples) {
     char dirname[10];
     char filename[40];
@@ -279,6 +304,12 @@ void export_examples_BMP(Example *images, size_t num_examples) {
 }
 
 
+/**
+ * @brief Export MNIST data to BMP images.
+ *
+ * @param fname_images File name for MNIST image data.
+ * @param fname_labels File name for MNIST label data.
+ */
 void export_MNIST(const char* fname_images, const char* fname_labels) {
     size_t num_examples;
 

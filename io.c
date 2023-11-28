@@ -7,6 +7,12 @@
 #include <string.h>
 
 
+/**
+ * @brief Converts the endianness of the given data from most significant byte to least significant byte.
+ *
+ * @param target Pointer to the data to be converted.
+ * @param size Size of the data in bytes.
+ */
 void msb_to_lsb(void *target, size_t size) {
     for (size_t i = 0; i < size / 2; i++) {
         swap((char *)target + i, (char*)target + (size - i - 1), 1);
@@ -14,6 +20,14 @@ void msb_to_lsb(void *target, size_t size) {
 }
 
 
+/**
+ * @brief Reads MNIST data from image and label files and stores it in the Example structure.
+ *
+ * @param images_fname File name for the MNIST images.
+ * @param labels_fname File name for the MNIST labels.
+ * @param images Pointer to the array of Example structures to store the data.
+ * @param len Pointer to store the length of the data.
+ */
 void read_MNIST_data(const char *images_fname, const char *labels_fname, Example **images, size_t *len) {
     *images = NULL;
     FILE *raw_images = fopen(images_fname, "rb");
@@ -91,7 +105,14 @@ void read_MNIST_data(const char *images_fname, const char *labels_fname, Example
 
 }
 
+
 // the size of the rows should include the paddig 0-s
+/**
+ * @brief Writes the content of a Matrix structure to a BMP file.
+ *
+ * @param fname File name for the BMP file.
+ * @param M Pointer to the Matrix structure to be written.
+ */
 void write_Matrix_BMP(const char *fname, Matrix *M) {
     BMP_HEADER header = {
         .signature = 0x4d42,
@@ -152,6 +173,12 @@ void write_Matrix_BMP(const char *fname, Matrix *M) {
 }
 
 
+
+/**
+ * @brief Creates a directory if it does not exist.
+ *
+ * @param path Path of the directory.
+ */
 void check_mkdir(char *path) {
     #ifdef _WIN32
         struct _stat info;
@@ -169,6 +196,12 @@ void check_mkdir(char *path) {
 }
 
 
+/**
+ * @brief Encodes the activation function pointer into an integer code.
+ *
+ * @param f Activation function pointer.
+ * @return Integer code representing the activation function.
+ */
 int encode_activation(activation_f f) {
     if (f == &ReLu_M) {
         return ReLu_CODE;
@@ -182,6 +215,12 @@ int encode_activation(activation_f f) {
 }
 
 
+/**
+ * @brief Decodes the integer code into an activation function pointer.
+ *
+ * @param f Integer code representing the activation function.
+ * @return Activation function pointer.
+ */
 activation_f decode_activation(int f) {
     switch (f) {
     case ReLu_CODE:
@@ -200,7 +239,12 @@ activation_f decode_activation(int f) {
 }
 
 
-// MLP *newMLP(int depth, int input_size, int hidden_layer_size, int output_size, activation_f* activate)
+/**
+ * @brief Writes the structure of a multi-layer perceptron (MLP) to a file.
+ *
+ * @param fname File name for the MLP file.
+ * @param model Pointer to the MLP structure to be written.
+ */
 void write_MLP(char *fname, MLP *model) {
     FILE *fp = fopen(fname, "wb");
     int encoded_activation;
@@ -237,6 +281,12 @@ void write_MLP(char *fname, MLP *model) {
 }
 
 
+/**
+ * @brief Reads the structure of a multi-layer perceptron (MLP) from a file.
+ *
+ * @param fname File name for the MLP file.
+ * @return Pointer to the read MLP structure.
+ */
 MLP *read_MLP(char *fname) {
     FILE *fp = fopen(fname, "rb");
     int encoded_activation;
