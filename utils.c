@@ -43,8 +43,15 @@ void check_malloc(void *ptr) {
 }
 
 
-void uint8_to_double(double *dest, uint8_t *source, size_t len){
+void uint8_to_double(double *dest, uint8_t *source, size_t len) {
     for (size_t i = 0; i < len; i++) {
         dest[i] = (double) source[i];
+    }
+}
+
+
+void copy_double_arr(double *dest, double *source, size_t len) {
+    for (size_t i = 0; i < len; i++) {
+        dest[i] = source[i];
     }
 }

@@ -9,5 +9,6 @@ void swap(void *a, void *b, size_t size);
 void shuffle(void *arr, size_t size, size_t len);
 void check_malloc(void *ptr);
 void uint8_to_double(double *dest, uint8_t *source, size_t len);
+void copy_double_arr(double *dest, double *source, size_t len);
 
 #endif

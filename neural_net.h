@@ -36,6 +36,20 @@ typedef struct {
 } MLP;
 
 
+// It contains values for one training example in each row, 
+// it holds data for a batch of examples, this way these values don't have to be
+// computed again during backwards propagation
+// pre activated values of the neurons (one matrix for each layer)
+// same with activated
+// origin: the MLP which it belongs to
+typedef struct {
+    int depth;
+    MLP *origin;
+    Matrix *pre_activated_values;
+    Matrix *activated_values;
+} MLP_data;
+
+
 enum activation_function {ReLu_CODE, sigmoid_CODE, softmax_CODE};
 
 
@@ -50,10 +64,13 @@ void print_M(Matrix *A);
 void fill_from_array_M(Matrix *A, double *arr, unsigned int len);
 void rand_M(Matrix *A, double min, double max);
 void ascii_print_M(Matrix *A);
+void copy_values_M(Matrix *dest, Matrix *source);
 MLP *newMLP(int depth, int input_size, int hidden_layer_size, int output_size, activation_f* activate);
 void freeMLP(MLP *dest);
+MLP_data *newMLP_data(MLP *neural_net, int batch_size);
+void freeMLP_data(MLP_data *dest);
 void add_row_V_M(Matrix* dest, Matrix* row_V);
-Matrix* feedForward(MLP* network, Matrix* input);
+Matrix* feedForward(MLP* network, Matrix* input, MLP_data *neuron_values);
 double ReLu(double x);
 void ReLu_M(Matrix* dest);
 double sigmoid(double x);

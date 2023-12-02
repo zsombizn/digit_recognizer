@@ -168,11 +168,21 @@ void ascii_print_M(Matrix *A) {
 }
 
 
+void copy_values_M(Matrix *dest, Matrix *source) {
+    if (dest->rows != source->rows && dest->columns != source->columns) {
+        fprintf(stderr, "Not matching dimensions!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    copy_double_arr(dest->data, source->data, dest->rows * dest->columns);
+}
+
+
 MLP *newMLP(int depth, int input_size, int hidden_layer_size, int output_size, activation_f* activate) {
-    MLP *Res = (MLP *)calloc(1, sizeof(MLP));
+    MLP *Res = (MLP *)malloc(sizeof(MLP));
     check_malloc(Res);
     Res->depth = depth;
-    Res->weights = (Matrix *)calloc(depth, sizeof(Matrix));
+    Res->weights = (Matrix *)malloc(sizeof(Matrix) * depth);
     Res->biases = (Matrix *)malloc(sizeof(Matrix) * depth);;
     Res->activate = activate;
 
@@ -212,6 +222,38 @@ void freeMLP(MLP *dest) {
 }
 
 
+MLP_data *newMLP_data(MLP *neural_net, int batch_size) {
+    MLP_data *Res = (MLP_data*)malloc(sizeof(MLP_data));
+    Res->depth = neural_net->depth;
+    Res->origin = neural_net;
+    Res->pre_activated_values = (Matrix*)malloc(sizeof(Matrix) * neural_net->depth);
+    Res->activated_values = (Matrix*)malloc(sizeof(Matrix) * neural_net->depth);
+
+    for (int i = 0; i < neural_net->depth; i++) {
+        newMatrixAt(&(Res->pre_activated_values[i]), batch_size, neural_net->weights[i].columns);
+        newMatrixAt(&(Res->activated_values[i]), batch_size, neural_net->weights[i].columns);
+    }
+
+    return Res;
+}
+
+
+void freeMLP_data(MLP_data *dest) {
+    if (dest == NULL) {
+        return;
+    }
+
+    for (int i = 0; i < dest->depth; i++) {
+        free(dest->pre_activated_values[i].data);
+        free(dest->activated_values[i].data);
+    }
+    free(dest->pre_activated_values);
+    free(dest->activated_values);
+    free(dest);
+
+} 
+
+
 // adds row vector for each row in dest
 void add_row_V_M(Matrix *dest, Matrix *row_V) {
     if (dest->columns != row_V->columns) {
@@ -231,18 +273,33 @@ void add_row_V_M(Matrix *dest, Matrix *row_V) {
 }
 
 
-Matrix* feedForward(MLP* network, Matrix* input) {
+Matrix* feedForward(MLP* network, Matrix* input, MLP_data *neuron_values) {
+    if (network != neuron_values->origin) {
+        fprintf(stderr, "The MLP_data does not belong to the given network!\n");
+        exit(EXIT_FAILURE);
+    }
     Matrix *z;
 
     Matrix *prev_z = product_M(input, &(network->weights[0]));
     add_row_V_M(prev_z, &(network->biases[0]));
+
+    copy_values_M(&(neuron_values->pre_activated_values[0]), prev_z);
+
     network->activate[0](prev_z);
+
+    copy_values_M(&(neuron_values->activated_values[0]), prev_z);
 
     for (int i = 1; i < network->depth; i++) {
         z = product_M(prev_z, &(network->weights[i]));
         add_row_V_M(z, &(network->biases[i]));
+
+
+        copy_values_M(&(neuron_values->pre_activated_values[i]), z);
+
         network->activate[i](z);
-        
+
+        copy_values_M(&(neuron_values->activated_values[i]), z);
+
 
         freeMatrix(prev_z);
         prev_z = z;

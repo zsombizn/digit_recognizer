@@ -93,6 +93,7 @@ void demo(){
     // 3 layers, input 2, hidden 2, output 1,
     activation_f acts[] = {&ReLu_M, &ReLu_M};
     MLP* net = newMLP(2, 2, 2, 1, acts);
+    MLP_data* neuron_values = newMLP_data(net, 4);
 
     // hidden layer weights and biases
     double data_w0[] = {1.0, 1.0, 1.0, 1.0};
@@ -116,7 +117,16 @@ void demo(){
 
     print_M(in);
 
-    Matrix *res = feedForward(net, in);
+    Matrix *res = feedForward(net, in, neuron_values);
+
+    printf("\nlayers-------\n");
+
+    for (int i = 0; i < neuron_values->depth; i++) {
+        printf("\nlayer %d:\n", i);
+        print_M(&(neuron_values->pre_activated_values[i]));
+        printf("activated:\n");
+        print_M(&(neuron_values->activated_values[i]));
+    }
 
     printf("\noutput------------\n");
     print_M(res);
@@ -124,10 +134,11 @@ void demo(){
     write_MLP("xor.bin", net);
 
     MLP *readed = read_MLP("xor.bin");
+    neuron_values->origin = readed;
 
     freeMatrix(res);
 
-    res = feedForward(readed, in);
+    res = feedForward(readed, in, neuron_values);
 
     printf("\noutput2-----------\n");
     print_M(res);
