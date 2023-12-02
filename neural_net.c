@@ -337,3 +337,28 @@ double MSE(Matrix* output, Matrix* y) {
 
     return sum / (double)y->rows;
 }
+
+
+// Mean of cross entropy error of a batch of outputs
+// y: desired output matrix
+double cross_entropy(Matrix *output, Matrix *y) {
+    if (output->rows != y->rows || output->columns != y->columns) {
+        fprintf(stderr, "Not matching matrix dimensions in cost!\n");
+        exit(EXIT_FAILURE);
+    }
+    double sum = 0.0;
+    double sum_per_row = 0.0;
+    double predicted = 0.0;
+    for (unsigned int i = 0; i < y->rows; i++) {
+        for (unsigned int j = 0; j < y->columns; j++) {
+            // because of the log, the predicted value can't be zero, in that case it uses a small value
+            predicted = MAX(1e-13, M_index(output, i, j));  // since predicted values are probabilities
+            sum_per_row += M_index(y, i, j) * log(predicted);
+        }
+        sum_per_row *= -1.0;
+        sum += sum_per_row;   // cross entropy of the row
+        sum_per_row = 0.0;
+    }
+
+    return sum / (double)y->rows;
+}

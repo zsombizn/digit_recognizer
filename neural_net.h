@@ -1,6 +1,7 @@
 #ifndef NNET_H
 #define NNET_H
 #define M_index(A, i, j) (A)->data[(i) * (A)->columns + (j)]
+#define MAX(A, B) (A) > (B) ? (A) : (B)
 #include <stddef.h>
 #include <stdint.h>
 
@@ -59,6 +60,7 @@ double sigmoid(double x);
 void sigmoid_M(Matrix *dest);
 void soft_max_M(Matrix *dest);
 double MSE(Matrix* output, Matrix* y);
+double cross_entropy(Matrix *output, Matrix *y);
 
 
 #endif

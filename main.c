@@ -242,6 +242,31 @@ void demo(){
 
     double rand_x = randf(0, 1);
     printf("\nsigmoid %lf: %lf\n", rand_x, sigmoid(rand_x));
+
+    printf("MAX(%d, %d) = %d\n", arr[0], arr[1], MAX(arr[0], arr[1]));
+
+    Matrix *test_output = newMatrix(3, 3);
+    rand_M(test_output, -2, 2);
+    soft_max_M(test_output);
+
+    Matrix *test_correct_out = newMatrix(3, 3);
+    M_index(test_correct_out, 0, 0) = 1.0;
+    M_index(test_correct_out, 1, 1) = 1.0;
+    M_index(test_correct_out, 1, 0) = 1.0;
+    M_index(test_correct_out, 2, 2) = 1.0;
+
+    printf("\nTest ouput:\n");
+    print_M(test_output);
+
+    printf("\nCorrect output:\n");
+    print_M(test_correct_out);
+
+    printf("\nCross entropy: %lf\n", cross_entropy(test_output, test_correct_out));
+
+    freeMatrix(test_output);
+    freeMatrix(test_correct_out);
+
+
 }
 
 
