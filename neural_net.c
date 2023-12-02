@@ -178,7 +178,7 @@ void copy_values_M(Matrix *dest, Matrix *source) {
 }
 
 
-MLP *newMLP(int depth, int input_size, int hidden_layer_size, int output_size, activation_f* activate) {
+MLP *newMLP(int depth, int input_size, int hidden_layer_size, int output_size, activation_f_M* activate) {
     MLP *Res = (MLP *)malloc(sizeof(MLP));
     check_malloc(Res);
     Res->depth = depth;
@@ -322,9 +322,11 @@ Matrix* feedForward(MLP* network, Matrix* input, MLP_data *neuron_values) {
 // and bias.
 // gradients: a dummy network for holding the gradient vector for multiple examples
 // neuron_values: the values of the neurons (before and after activation)
+// inputs: input matrix
 // desired_outputs: desired output in each row of the matrix (of each example)
-void back_propagate(MLP *network, MLP *gradients, MLP_data *neuron_values, Matrix *desired_outputs, int num_examples) {
 
+void back_propagate(MLP *network, MLP *gradients, MLP_data *neuron_values, Matrix *inputs, Matrix *desired_outputs) {
+    int num_examples = inputs->rows;
     // check the inputs whether they describe the same network architecture
     if (gradients->depth != neuron_values->depth) {
         fprintf(stderr, "gradients contains different number of layers, than neuron_values!\n");
@@ -368,11 +370,13 @@ void back_propagate(MLP *network, MLP *gradients, MLP_data *neuron_values, Matri
         }
     }
 
+
     // calculating the other layers neurons losses
     // n-th hidden layer, k-th example, i-th neuron of n, j-th neuron of layer n+1
 
     double sum = 0;
-    double weight_i_j = 0;
+    double weight_i_j = 0;            // weight connecting i with j
+    double activation_delta = 0;      // the derivative of the activation function
 
     for (int n = depth-1-1; n >= 0; n--) {
         for (int k = 0; k < num_examples; k++) {
@@ -380,20 +384,73 @@ void back_propagate(MLP *network, MLP *gradients, MLP_data *neuron_values, Matri
                 sum = 0;
                 for (int j = 0; j < gradients->weights[n+1].columns; j++){
                     weight_i_j = M_index(&(network->weights[n+1]), i, j);
-                    sum += M_index(&(layer_deltas[n+1]), k, j) * weight_i_j;
+                    activation_delta = (derivative(network->activate[n]))(M_index(&(neuron_values->pre_activated_values[n]), k, i));
+                    sum += M_index(&(layer_deltas[n+1]), k, j) * weight_i_j * activation_delta;
 
+                }
+                M_index(&(layer_deltas[n]), k, i) = sum;
+            }
+        }
+    }
+
+
+    // calculating for weights (each examples gets added to the gradient,
+    // then dividing with the number of examples gives mean
+    // activated_m: its the matrix of the layers activated outputs
+    // activated value: value of the neuron, which's weight is being calculated
+
+
+    Matrix *activated_m = inputs;
+    double layer_delta = 0;
+    double activated_value = 0;
+
+
+    for (int n = 0; n < depth; n++) {
+        if (n > 0) {
+            activated_m = &(neuron_values->activated_values[n-1]);  // first sets it to the hidden layer's values
+        }
+        for (int k = 0; k < num_examples; k++) {
+            for (int i = 0; i < gradients->weights[n].rows; i++) {
+                activated_value = M_index(activated_m, k, i);
+
+                for (int j = 0; j < gradients->weights[n].columns; j++) {
+                    layer_delta = M_index(&(layer_deltas[n]), k, j);
+                    M_index(&(gradients->weights[n]), i, j) += layer_delta * activated_value;
                 }
             }
         }
     }
 
 
+    // dividing to get mean
+    for (int n = 0; n < depth; n++) {
+        for (int i = 0; i < gradients->weights[n].rows; i++) {
+            for (int j = 0; j < gradients->weights[n].columns; j++) {
+                M_index(&(gradients->weights[n]), i, j) /= (double) num_examples;
+            }
+        }
+    }
 
 
+    // calculating gradient in respect of biases is easyer, since it's equal with layer deltas
+    for (int n = 0; n < depth; n++) {
+        for (int k = 0; k < num_examples; k++) {
+            for (int j = 0; j < gradients->biases[n].columns; j++) {
+                layer_delta = M_index(&(layer_deltas[n]), k, j);
+                M_index(&(gradients->weights[n]), 0, j) += layer_delta;
+            }
+        }
+    }
 
-
+    // dividing to get mean
+    for (int n = 0; n < depth; n++) {
+        for (int j = 0; j < gradients->biases[n].columns; j++) {
+            M_index(&(gradients->biases[n]), 0, j) /= (double)num_examples;
+        }
+    }
 
 }
+
 
 double ReLu(double x) {
     if (x < 0) {
@@ -401,6 +458,16 @@ double ReLu(double x) {
     }
     else {
         return x;
+    }
+}
+
+
+double ReLu_d(double x) {
+    if (x > 0) {
+        return 1;
+    }
+    else {
+        return 0;
     }
 }
 
@@ -421,6 +488,11 @@ void ReLu_M(Matrix* dest) {
 
 double sigmoid(double x) {
     return 1 / (double)(1 + exp(-x));
+}
+
+
+double sigmoid_d(double x) {
+    return sigmoid(x) * (1 - sigmoid(x));
 }
 
 
@@ -504,4 +576,17 @@ double cross_entropy(Matrix *output, Matrix *y) {
     }
 
     return sum / (double)y->rows;
+}
+
+
+activation_f derivative(activation_f func) {
+    if (func == &ReLu_M) {
+        return &ReLu_d;
+    }
+    else if (func == &sigmoid_M) {
+        return &sigmoid_d;
+    }
+    else {
+        return (activation_f)NULL;
+    }
 }

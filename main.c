@@ -142,7 +142,7 @@ void demo(){
     
     MLP *grads = newMLP(2, 2, 2, 1, NULL);
     
-    back_propagate(readed, grads, neuron_values, res, 4);
+    back_propagate(readed, grads, neuron_values, in, res, 4);
 
     printf("\noutput2-----------\n");
     print_M(res);

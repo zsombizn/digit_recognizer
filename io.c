@@ -169,7 +169,7 @@ void check_mkdir(char *path) {
 }
 
 
-int encode_activation(activation_f f) {
+int encode_activation(activation_f_M f) {
     if (f == &ReLu_M) {
         return ReLu_CODE;
     } else if(f == &sigmoid_M) {
@@ -182,7 +182,7 @@ int encode_activation(activation_f f) {
 }
 
 
-activation_f decode_activation(int f) {
+activation_f_M decode_activation(int f) {
     switch (f) {
     case ReLu_CODE:
         return &ReLu_M;
@@ -200,7 +200,7 @@ activation_f decode_activation(int f) {
 }
 
 
-// MLP *newMLP(int depth, int input_size, int hidden_layer_size, int output_size, activation_f* activate)
+// MLP *newMLP(int depth, int input_size, int hidden_layer_size, int output_size, activation_f_M* activate)
 void write_MLP(char *fname, MLP *model) {
     FILE *fp = fopen(fname, "wb");
     int encoded_activation;
@@ -241,14 +241,14 @@ MLP *read_MLP(char *fname) {
     FILE *fp = fopen(fname, "rb");
     int encoded_activation;
     int depth, input_size, hidden_layer_size, output_size;
-    activation_f* activate;
+    activation_f_M* activate;
 
     MLP *Res;
 
     // depth
     fread(&depth, sizeof(int), 1, fp);
 
-    activate = malloc(sizeof(activation_f) * depth);
+    activate = malloc(sizeof(activation_f_M) * depth);
     check_malloc(activate);
 
     // input size
