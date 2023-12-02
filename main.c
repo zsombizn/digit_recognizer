@@ -92,8 +92,8 @@ void demo(){
 
     // 3 layers, input 2, hidden 2, output 1,
     activation_f acts[] = {&ReLu_M, &ReLu_M};
-    MLP* net = newMLP(2, 2, 2, 1, acts);
-    MLP_data* neuron_values = newMLP_data(net, 4);
+    MLP *net = newMLP(2, 2, 2, 1, acts);
+    MLP_data *neuron_values = newMLP_data(net, 4);
 
     // hidden layer weights and biases
     double data_w0[] = {1.0, 1.0, 1.0, 1.0};
@@ -108,7 +108,7 @@ void demo(){
 
 
     // input data
-    Matrix* in = newMatrix(4, 2);
+    Matrix *in = newMatrix(4, 2);
     double data_in[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 
     fill_from_array_M(in, data_in, sizeof(data_in) / sizeof(data_in[0]));
@@ -139,6 +139,10 @@ void demo(){
     freeMatrix(res);
 
     res = feedForward(readed, in, neuron_values);
+    
+    MLP *grads = newMLP(2, 2, 2, 1, NULL);
+    
+    back_propagate(readed, grads, neuron_values, res, 4);
 
     printf("\noutput2-----------\n");
     print_M(res);

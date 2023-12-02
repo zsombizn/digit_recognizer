@@ -273,6 +273,14 @@ void add_row_V_M(Matrix *dest, Matrix *row_V) {
 }
 
 
+void rand_weights_biases(MLP* network) {
+    for (int i = 0; i < network->depth; i++) {
+        rand_M(&(network->weights[i]), -1, 1);
+        rand_M(&(network->biases[i]), -1, 1);
+    }
+}
+
+
 Matrix* feedForward(MLP* network, Matrix* input, MLP_data *neuron_values) {
     if (network != neuron_values->origin) {
         fprintf(stderr, "The MLP_data does not belong to the given network!\n");
@@ -308,6 +316,84 @@ Matrix* feedForward(MLP* network, Matrix* input, MLP_data *neuron_values) {
     return z;
 }
 
+
+// CURRENTLY IT SUPPORTS ONLY SOFTMAX AND CROSS-ENTROPY ON THE OUTPUT LAYER
+// computes the gradient of the loss function in the respect of each weight
+// and bias.
+// gradients: a dummy network for holding the gradient vector for multiple examples
+// neuron_values: the values of the neurons (before and after activation)
+// desired_outputs: desired output in each row of the matrix (of each example)
+void back_propagate(MLP *network, MLP *gradients, MLP_data *neuron_values, Matrix *desired_outputs, int num_examples) {
+
+    // check the inputs whether they describe the same network architecture
+    if (gradients->depth != neuron_values->depth) {
+        fprintf(stderr, "gradients contains different number of layers, than neuron_values!\n");
+        exit(EXIT_FAILURE);
+    }
+    for (int i = 0; i < gradients->depth; i++) {
+        if (gradients->weights[i].columns != neuron_values->activated_values[i].columns) {
+            fprintf(stderr, "Gradient networks neuron count doesn't match the neuron count in neuron_values! (Hidden layer %d)!\n", i);
+            exit(EXIT_FAILURE);
+        }
+        if (desired_outputs->rows != num_examples || neuron_values->activated_values[i].rows != num_examples) {
+            fprintf(stderr, "desired_outputs and neuron_values hold values for different number of examples!\n");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    int depth = neuron_values->depth;
+    
+
+    // layer deltas hold the partial derivative of the loss in the respect of the neuron input (z)
+    // in each matrix row is the values calculated based on an example
+    // each column contains values for a given neuron
+    Matrix *layer_deltas = (Matrix *)malloc(sizeof(Matrix) * gradients->depth);
+    for(int i = 0; i < gradients->depth; i++) {
+        newMatrixAt(&(layer_deltas[i]), num_examples, neuron_values->activated_values[i].columns);
+    }
+
+    
+    // calculating the loss of the output layer
+    double softmax_val = 0; // activated output of softmax neuron
+    double desired_val = 0; // the desired value of that given neuron
+
+    for (int i = 0; i < num_examples; i++) {
+        for (int j = 0; j < neuron_values->activated_values[depth-1].columns; j++) {
+
+            // because of the specific loss and activation:
+            softmax_val = M_index(&(neuron_values->activated_values[depth-1]), i, j);
+            desired_val = M_index(desired_outputs, i, j);
+
+            M_index(&(layer_deltas[depth-1]), i, j) = softmax_val - desired_val;
+        }
+    }
+
+    // calculating the other layers neurons losses
+    // n-th hidden layer, k-th example, i-th neuron of n, j-th neuron of layer n+1
+
+    double sum = 0;
+    double weight_i_j = 0;
+
+    for (int n = depth-1-1; n >= 0; n--) {
+        for (int k = 0; k < num_examples; k++) {
+            for (int i = 0; i < gradients->weights[n].columns; i++) {
+                sum = 0;
+                for (int j = 0; j < gradients->weights[n+1].columns; j++){
+                    weight_i_j = M_index(&(network->weights[n+1]), i, j);
+                    sum += M_index(&(layer_deltas[n+1]), k, j) * weight_i_j;
+
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+}
 
 double ReLu(double x) {
     if (x < 0) {
