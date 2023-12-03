@@ -6,7 +6,7 @@
 #include <time.h>
 #include <string.h>
 
-enum task {HELP, DEMO, EXPORT_MNIST, TRAIN};
+enum task {HELP, DEMO, EXPORT_MNIST, TRAIN, RECOGNIZE};
 
 void export_examples_BMP(Example *images, size_t num_examples);
 void parse_opt(char *option, int *task_arr, int *opt_argc, char **option_argv);
@@ -15,6 +15,7 @@ void demo();
 void export_MNIST(const char* fname_images, const char *fname_labels);
 void train(const char* fname_images, const char* fname_labels, char* s_epochs, char* s_batch_size, char* s_learning_rate);
 void test_model(const char* fname);
+void recognize(const char *fname, const char *model);
 
 
 int main(int argc, char* argv[]) {
@@ -23,7 +24,7 @@ int main(int argc, char* argv[]) {
     // each command line option creates a task, which is stored here, with a 
     // non zero number, which is the index in the opt_argv, where the arguments
     // of the given option are stored
-    int task_arr[] = {0, 0, 0, 0};
+    int task_arr[] = {0, 0, 0, 0, 0};
 
     // opt_argv is an array of strings, holds the arguments of the different options
     char **opt_argv = malloc(sizeof(char *) * argc);
@@ -57,6 +58,10 @@ int main(int argc, char* argv[]) {
     if (task_arr[TRAIN] != 0) {
         train(opt_argv[task_arr[TRAIN]], opt_argv[task_arr[TRAIN]+1], opt_argv[task_arr[TRAIN]+2], opt_argv[task_arr[TRAIN]+3], opt_argv[task_arr[TRAIN]+4]);
     }
+
+    if (task_arr[RECOGNIZE] != 0) {
+        recognize(opt_argv[task_arr[RECOGNIZE]], opt_argv[task_arr[RECOGNIZE]+1]);
+    }
     
     return 0;
     
@@ -77,6 +82,8 @@ void parse_opt(char *option, int *task_arr, int *opt_argc, char **option_argv) {
         task_arr[HELP] = *opt_argc;
     } else if (strcmp(option, "-t") == 0 || strcmp(option, "--train") == 0) {
         task_arr[TRAIN] = *opt_argc;
+    } else if (strcmp(option, "-r") == 0 || strcmp(option, "--recognize") == 0) {
+        task_arr[RECOGNIZE] = *opt_argc;
     } else {
         printf("Invalid option: '%s'\n", option);
         task_arr[HELP] = *opt_argc;
@@ -89,6 +96,9 @@ void print_help(const char* exec_name) {
     printf("Options:\n   -h, --help: Print this message\n");
     printf("   -d, --demo: Show the inner workings of the implemented functions\n");
     printf("   -E images labels, --export-MNIST images labels: export MNIST data from images and the corresponding labels file.\n");
+    printf("   -t *args, --train *args: train a model on the MNIST dataset with given parameters, then test it using the test data.\n");
+    printf("      *args: images labels epochs batch_size learning_rate\n");
+    printf("   -r image model, --recognize image model: Run the given model with the image as input. (bmp, 28x28)\n");
 }
 
 
@@ -497,4 +507,47 @@ void test_model(const char* fname) {
 
     printf("Accuracy on test set: %f (%d/%d)\n", (double) corr / (double) examined, corr, examined);
 
+    freeMLP(trained);
+    freeMLP_data(neuron_values);
+
+    for (size_t i = 0; i < num_examples; i++) {
+        free(images[i].data_array);
+    }
+
+    free(images);
+
+    freeMatrix(input);
+    freeMatrix(res);
+
+
+}
+
+
+void recognize(const char *fname, const char *model) {
+    
+    Matrix *image = read_Matrix_BMP(fname);
+    if (image->rows != 28 && image->columns != 28) {
+        fprintf(stderr, "Invalid dimensions of given image! It should be 28x28!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    image->columns = image->rows * image->columns;
+    image->rows = 1;
+    
+    MLP* trained = read_MLP(model);
+    MLP_data* neuron_values = newMLP_data(trained, 1);
+
+    Matrix* res = newMatrix(1, 10);
+
+    feedForward(trained, image, res, neuron_values);
+    
+    printf("Raw output from the network:\n");
+    print_M(res);
+
+    printf("\nBased on this, the image contains most likely a %d.\n", findMax(res->data));
+
+    freeMatrix(image);
+    freeMLP(trained);
+    freeMLP_data(neuron_values);
+    freeMatrix(res);
 }

@@ -91,6 +91,7 @@ void read_MNIST_data(const char *images_fname, const char *labels_fname, Example
 
 }
 
+
 // the size of the rows should include the paddig 0-s
 void write_Matrix_BMP(const char *fname, Matrix *M) {
     BMP_HEADER header = {
@@ -152,7 +153,60 @@ void write_Matrix_BMP(const char *fname, Matrix *M) {
 }
 
 
-void write_Matrix_txt(FILE* fp, Matrix* A) {
+Matrix *read_Matrix_BMP(const char *fname) {
+    BMP_HEADER header;
+    BITPMAPINFOHEADER dib;
+    FILE *image = fopen(fname, "rb");
+    fread(&header, sizeof(BMP_HEADER), 1, image);
+    fread(&dib, sizeof(BITPMAPINFOHEADER), 1, image);
+
+    if (dib.header_size != sizeof(BITPMAPINFOHEADER)) {
+        fprintf(stderr,"Incompatible BMP!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (dib.depth != 24) {
+        fprintf(stderr, "Incompatible depth of image!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    int row_size = ((dib.width * 3 + 3)/4)*4;        // calculated row size, including padding
+
+    uint8_t **raw_pixel_data = (uint8_t **)malloc(sizeof(uint8_t*)*dib.height);
+    for (int i = 0; i < dib.height; i++) {
+        raw_pixel_data[i] = (uint8_t *)malloc(sizeof(uint8_t) * row_size);
+    }
+
+    Matrix *res = newMatrix((int)dib.height, (int)dib.width);
+
+    fseek(image, header.offset, SEEK_SET);  // from the beginning
+
+    for (int32_t i = 0; i < dib.height; i++) {
+        fread(raw_pixel_data[dib.height - 1 - i], sizeof(uint8_t), row_size, image);
+    }
+
+    int sum;
+    // converting pixel array into matrix, averaging RGB values
+
+    for (int i = 0; i < res->rows; i++) {
+        for (int j = 0; j < res->columns; j++) {
+            sum = raw_pixel_data[i][j*3] + raw_pixel_data[i][j*3 + 1] + raw_pixel_data[i][j*3 + 2];
+            M_index(res, i, j) = sum / (double) 3;
+        }
+    }
+
+    for (int32_t i = 0; i < dib.height; i++) {
+        free(raw_pixel_data[i]);
+    }
+    free(raw_pixel_data);
+
+    fclose(image);
+
+    return res;
+}
+
+
+void write_Matrix_txt(FILE *fp, Matrix *A) {
     for (unsigned int i = 0; i < A->rows; i++) {
         fprintf(fp, "    ");
         for (unsigned int j = 0; j < A->columns; j++) {
@@ -166,7 +220,7 @@ void write_Matrix_txt(FILE* fp, Matrix* A) {
 }
 
 
-void write_model_txt(const char* fname, MLP *net) {
+void write_model_txt(const char *fname, MLP *net) {
     FILE* fp = fopen(fname, "a");
     for (int i = 0; i < net->depth; i++) {
         fprintf(fp, "Layer %d:\n", i);
@@ -180,7 +234,7 @@ void write_model_txt(const char* fname, MLP *net) {
 }
 
 
-void write_neruons_txt(const char* fname, MLP_data* neuron_vals) {
+void write_neruons_txt(const char *fname, MLP_data *neuron_vals) {
     FILE* fp = fopen(fname, "a");
     for (int i = 0; i < neuron_vals->depth; i++) {
         fprintf(fp, "Layer %d:\n", i);
