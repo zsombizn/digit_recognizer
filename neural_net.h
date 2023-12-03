@@ -51,7 +51,7 @@ typedef struct {
 } MLP_data;
 
 
-enum activation_f_Munction {ReLu_CODE, sigmoid_CODE, softmax_CODE};
+enum activation_functions_M{ReLu_CODE, sigmoid_CODE, softmax_CODE};
 
 
 Matrix *newMatrix(int rows, int columns);
