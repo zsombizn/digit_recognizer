@@ -152,6 +152,47 @@ void write_Matrix_BMP(const char *fname, Matrix *M) {
 }
 
 
+void write_Matrix_txt(FILE* fp, Matrix* A) {
+    for (unsigned int i = 0; i < A->rows; i++) {
+        fprintf(fp, "    ");
+        for (unsigned int j = 0; j < A->columns; j++) {
+            fprintf(fp, "%3.10f", M_index(A, i, j));
+            if (j != A->columns - 1) {
+                fprintf(fp, ", ");
+            }
+        }
+        fputc('\n', fp);
+    }
+}
+
+
+void write_model_txt(const char* fname, MLP *net) {
+    FILE* fp = fopen(fname, "a");
+    for (int i = 0; i < net->depth; i++) {
+        fprintf(fp, "Layer %d:\n", i);
+        fprintf(fp, "  weights:\n");
+        write_Matrix_txt(fp, &(net->weights[i]));
+        fprintf(fp, "  biases:\n");
+        write_Matrix_txt(fp, &(net->biases[i]));
+        fprintf(fp, "\n\n");
+    }
+    fclose(fp);
+}
+
+
+void write_neruons_txt(const char* fname, MLP_data* neuron_vals) {
+    FILE* fp = fopen(fname, "a");
+    for (int i = 0; i < neuron_vals->depth; i++) {
+        fprintf(fp, "Layer %d:\n", i);
+        fprintf(fp, "  pre-activated:\n");
+        write_Matrix_txt(fp, &(neuron_vals->pre_activated_values[i]));
+        fprintf(fp, "  activated:\n");
+        write_Matrix_txt(fp, &(neuron_vals->activated_values[i]));
+        fprintf(fp, "\n\n");
+    }
+    fclose(fp);
+}
+
 void check_mkdir(char *path) {
     #ifdef _WIN32
         struct _stat info;
@@ -174,7 +215,7 @@ int encode_activation(activation_f_M f) {
         return ReLu_CODE;
     } else if(f == &sigmoid_M) {
         return sigmoid_CODE;
-    } else if(f == &soft_max_M) {
+    } else if(f == &softmax_M) {
         return softmax_CODE;
     } else {
         return -1;
@@ -191,7 +232,7 @@ activation_f_M decode_activation(int f) {
         return &sigmoid_M;
 
     case softmax_CODE:
-        return &soft_max_M;
+        return &softmax_M;
 
     default:
         return NULL;

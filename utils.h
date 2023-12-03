@@ -10,5 +10,8 @@ void shuffle(void *arr, size_t size, size_t len);
 void check_malloc(void *ptr);
 void uint8_to_double(double *dest, uint8_t *source, size_t len);
 void copy_double_arr(double *dest, double *source, size_t len);
+int str_to_int(const char* str);
+double str_to_double(const char* str);
+double* one_hot(double* dest, uint8_t n, int len);
 
 #endif

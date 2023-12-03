@@ -6,13 +6,15 @@
 #include <time.h>
 #include <string.h>
 
-enum task {HELP, DEMO, EXPORT_MNIST};
+enum task {HELP, DEMO, EXPORT_MNIST, TRAIN};
 
 void export_examples_BMP(Example *images, size_t num_examples);
 void parse_opt(char *option, int *task_arr, int *opt_argc, char **option_argv);
 void print_help(const char *exec_name);
 void demo();
 void export_MNIST(const char* fname_images, const char *fname_labels);
+void train(const char* fname_images, const char* fname_labels, char* s_epochs, char* s_batch_size, char* s_learning_rate);
+void test_model(const char* fname);
 
 
 int main(int argc, char* argv[]) {
@@ -21,7 +23,7 @@ int main(int argc, char* argv[]) {
     // each command line option creates a task, which is stored here, with a 
     // non zero number, which is the index in the opt_argv, where the arguments
     // of the given option are stored
-    int task_arr[] = {0, 0, 0};
+    int task_arr[] = {0, 0, 0, 0};
 
     // opt_argv is an array of strings, holds the arguments of the different options
     char **opt_argv = malloc(sizeof(char *) * argc);
@@ -52,7 +54,10 @@ int main(int argc, char* argv[]) {
         export_MNIST(opt_argv[task_arr[EXPORT_MNIST]], opt_argv[task_arr[EXPORT_MNIST]+1]);
     }
 
-
+    if (task_arr[TRAIN] != 0) {
+        train(opt_argv[task_arr[TRAIN]], opt_argv[task_arr[TRAIN]+1], opt_argv[task_arr[TRAIN]+2], opt_argv[task_arr[TRAIN]+3], opt_argv[task_arr[TRAIN]+4]);
+    }
+    
     return 0;
     
     
@@ -70,6 +75,8 @@ void parse_opt(char *option, int *task_arr, int *opt_argc, char **option_argv) {
         task_arr[EXPORT_MNIST] = *opt_argc;
     } else if (strcmp(option, "-h") == 0 || strcmp(option, "--help") == 0) {
         task_arr[HELP] = *opt_argc;
+    } else if (strcmp(option, "-t") == 0 || strcmp(option, "--train") == 0) {
+        task_arr[TRAIN] = *opt_argc;
     } else {
         printf("Invalid option: '%s'\n", option);
         task_arr[HELP] = *opt_argc;
@@ -111,13 +118,15 @@ void demo(){
     Matrix *in = newMatrix(4, 2);
     double data_in[] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
 
+    Matrix* res = newMatrix(4, 1);
+
     fill_from_array_M(in, data_in, sizeof(data_in) / sizeof(data_in[0]));
 
     printf("\ninput-------------\n");
 
     print_M(in);
 
-    Matrix *res = feedForward(net, in, neuron_values);
+   feedForward(net, in, res, neuron_values);
 
     printf("\nlayers-------\n");
 
@@ -138,7 +147,7 @@ void demo(){
 
     freeMatrix(res);
 
-    res = feedForward(readed, in, neuron_values);
+    feedForward(readed, in, res, neuron_values);
     
     MLP *grads = newMLP(2, 2, 2, 1, NULL);
     
@@ -184,7 +193,7 @@ void demo(){
     freeMatrix(Prod);
 
     printf("\nSoftmax-X---------\n");
-    soft_max_M(X);
+    softmax_M(X);
     print_M(X);
 
     rand_M(M, 0.0, 5);
@@ -262,7 +271,7 @@ void demo(){
 
     Matrix *test_output = newMatrix(3, 3);
     rand_M(test_output, -2, 2);
-    soft_max_M(test_output);
+    softmax_M(test_output);
 
     Matrix *test_correct_out = newMatrix(3, 3);
     M_index(test_correct_out, 0, 0) = 1.0;
@@ -336,4 +345,162 @@ void export_MNIST(const char* fname_images, const char* fname_labels) {
 
 }
 
+// train model on MNIST data
+void train(const char* fname_images, const char* fname_labels, char* s_epochs, char* s_batch_size, char* s_learning_rate) {
+    if (fname_images == NULL || fname_labels == NULL || s_epochs == NULL || s_batch_size == NULL || s_learning_rate == NULL) {
+        fprintf(stderr, "Missing arguments!\n");
+        exit(EXIT_FAILURE);
+    }
+    int epochs = str_to_int(s_epochs);
+    int batch_size = str_to_int(s_batch_size);
+    double learning_rate = str_to_double(s_learning_rate);
 
+    printf("\nCalled train with %s %s %d %d %lf\n", fname_images, fname_labels, epochs, batch_size, learning_rate);
+
+    size_t num_examples;
+    int processed = 0;
+
+    Example* images;
+
+    read_MNIST_data(fname_images, fname_labels, &images, &num_examples);
+
+    shuffle(images, sizeof(Example), num_examples);
+
+    Matrix* batch = newMatrix(batch_size, 28 * 28);
+    Matrix* y_M = newMatrix(batch_size, 10);
+
+    double* y = (double*)malloc(sizeof(double) * 10);
+
+
+    // 4 layers, input, 2 hidden, output
+    activation_f acts[] = { &ReLu_M, &sigmoid_M, &softmax_M };
+    MLP* net = newMLP(3, 28 * 28, 20, 10, acts);
+
+    rand_weights_biases(net);
+
+    MLP_data* neruon_values = newMLP_data(net, batch_size);
+
+    MLP* gradients = newMLP(3, 28 * 28, 20, 10, NULL);
+
+    Matrix* res = newMatrix(batch_size, 10);
+
+    char fname[50];
+
+
+    for (int i = 0; i < epochs; i++) {
+        
+        // cerate batches
+        for (int k = 0; k < batch_size; k++) {
+            if (num_examples - processed < batch_size) {
+                processed = num_examples;
+                break;
+            }
+            fill_row_from_int_array_scaled_M(batch, k, images[processed + k].data_array, 28 * 28);
+            one_hot(y, images[processed + k].label, 10);
+            fill_row_from_array_M(y_M, k, y, 10);
+            processed++;
+        }
+
+        while (num_examples - processed > batch_size) {
+
+            feedForward(net, batch, res, neruon_values);
+
+
+            /*
+            printf("\r%d", processed);
+            sprintf(&fname, "dbgdata/%d_%d_net.txt", i, processed);
+            write_model_txt(fname, net);
+            sprintf(&fname, "dbgdata/%d_%d_gradients.txt", i, processed);
+            write_model_txt(fname, gradients);
+            sprintf(&fname, "dbgdata/%d_%d_neuron_values.txt", i, processed);
+            write_neruons_txt(fname, neruon_values);
+            */
+
+            if (processed < 100 || processed % 100 == 0) {
+                printf("\nloss: %lf\n", cross_entropy(res, y_M));
+
+            }
+
+            back_propagate(net, gradients, neruon_values, batch, y_M);
+
+            modify_weights_biases(net, gradients, learning_rate);
+            
+            
+            // cerate batches
+            for (int k = 0; k < batch_size; k++) {
+                if (num_examples - processed < batch_size) {
+                    processed = num_examples;
+                        break;
+                }
+                fill_row_from_int_array_scaled_M(batch, k, images[processed + k].data_array, 28 * 28);
+                one_hot(y, images[processed + k].label, 10);
+                fill_row_from_array_M(y_M, k, y, 10);
+                processed++;
+            }
+        }
+        processed = 0;
+        printf("\nEpochs: %d/%d, loss: %lf\n", i + 1, epochs, cross_entropy(res, y_M));
+    }
+
+    freeMatrix(batch);
+
+    write_MLP("MNIST_trained.bin", net);
+    test_model("MNIST_trained.bin");
+    
+    for (size_t i = 0; i < num_examples; i++) {
+        free(images[i].data_array);
+    }
+
+    free(images);
+    free(y);
+    freeMatrix(y_M);
+}
+
+
+uint8_t findMax(double* prediction) {
+    double max = 0;
+    uint8_t res = 0;
+    for (int i = 0; i < 10; i++) {
+        if (prediction[i] > max) {
+            max = prediction[i];
+            res = i;
+        }
+    }
+    return res;
+}
+
+
+int correct(double* prediction, uint8_t label) {
+    if (findMax(prediction) == label) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+
+void test_model(const char* fname) {
+    MLP* trained = read_MLP(fname);
+    MLP_data* neuron_values = newMLP_data(trained, 1);
+    Example* images;
+    size_t num_examples;
+    read_MNIST_data("t10k-images.idx3-ubyte", "t10k-labels.idx1-ubyte", &images, &num_examples);
+    Matrix* input = newMatrix(1, 28 * 28);
+    Matrix* res = newMatrix(1, 10);
+    int corr = 0;
+    int examined = 0;
+
+
+    for (size_t i = 0; i < num_examples; i++) {
+        examined++;
+        fill_row_from_int_array_scaled_M(input, 0, images[i].data_array, 28 * 28);
+        feedForward(trained, input, res, neuron_values);
+        if (correct(res->data, images[i].label)) {
+            corr++;
+        }
+    }
+
+    printf("Accuracy on test set: %f (%d/%d)\n", (double) corr / (double) examined, corr, examined);
+
+}

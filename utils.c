@@ -55,3 +55,53 @@ void copy_double_arr(double *dest, double *source, size_t len) {
         dest[i] = source[i];
     }
 }
+
+
+int str_to_int(const char* str) {
+    char* endptr;
+    long l_value = strtol(str, &endptr, 10);
+
+    if (endptr == str) {
+        fprintf(stderr, "Clear input string!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (*endptr != '\0') {
+        printf("Not a valid integer!\n");
+    }
+
+    return (int)l_value;
+}
+
+
+double str_to_double(const char* str) {
+    char* endptr;
+    double res = strtod(str, &endptr);
+
+    if (endptr == str) {
+        fprintf(stderr, "Clear input string!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (*endptr != '\0') {
+        printf("Not a valid double!\n");
+    }
+
+    return res;
+}
+
+
+double *one_hot(double *dest, uint8_t n, int len) {
+    if (n > len) {
+        fprintf(stderr, "It is not possible to one-hot encode!\n");
+        exit(EXIT_FAILURE);
+    }
+    for (int i = 0; i < len; i++) {
+        if (i == n) {
+            dest[i] = 1.0;
+        }
+        else {
+            dest[i] = 0.0;
+        }
+    }
+}

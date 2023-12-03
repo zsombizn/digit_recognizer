@@ -1,5 +1,6 @@
 #include "neural_net.h"
 #include "utils.h"
+#include "io.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -46,6 +47,15 @@ void freeMatrix(Matrix *dest) {
 
     free(dest->data);
     free(dest);
+}
+
+
+void resetMatrix(Matrix* dest) {
+    for (int i = 0; i < dest->rows; i++) {
+        for (int j = 0; j < dest->columns; j++) {
+            M_index(dest, i, j) = 0.0;
+        }
+    }
 }
 
 
@@ -178,6 +188,36 @@ void copy_values_M(Matrix *dest, Matrix *source) {
 }
 
 
+void fill_row_from_array_M(Matrix* dest, unsigned int row, double *arr, int len) {
+    if (len != dest->columns) {
+        fprintf(stderr, "Not matching length and column number!\n");
+        exit(EXIT_FAILURE);
+    }
+    if (row >= dest->rows) {
+        fprintf(stderr, "Invalid row index!\n");
+        exit(EXIT_FAILURE);
+    }
+    for (int j = 0; j < dest->columns; j++) {
+        M_index(dest, row, j) = arr[j];
+    }
+}
+
+
+void fill_row_from_int_array_scaled_M(Matrix* dest, unsigned int row, uint8_t* arr, int len) {
+    if (len != dest->columns) {
+        fprintf(stderr, "Not matching length and column number!\n");
+        exit(EXIT_FAILURE);
+    }
+    if (row >= dest->rows) {
+        fprintf(stderr, "Invalid row index!\n");
+        exit(EXIT_FAILURE);
+    }
+    for (int j = 0; j < dest->columns; j++) {
+        M_index(dest, row, j) = ( ((double) arr[j]) / (double) 255);
+    }
+}
+
+
 MLP *newMLP(int depth, int input_size, int hidden_layer_size, int output_size, activation_f_M* activate) {
     MLP *Res = (MLP *)malloc(sizeof(MLP));
     check_malloc(Res);
@@ -275,13 +315,13 @@ void add_row_V_M(Matrix *dest, Matrix *row_V) {
 
 void rand_weights_biases(MLP* network) {
     for (int i = 0; i < network->depth; i++) {
-        rand_M(&(network->weights[i]), -1, 1);
-        rand_M(&(network->biases[i]), -1, 1);
+        rand_M(&(network->weights[i]), -0.01, 0.01);
+        rand_M(&(network->biases[i]), -0.01, 0.01);
     }
 }
 
 
-Matrix* feedForward(MLP* network, Matrix* input, MLP_data *neuron_values) {
+void feedForward(MLP *network, Matrix *input, Matrix *output, MLP_data *neuron_values) {
     if (network != neuron_values->origin) {
         fprintf(stderr, "The MLP_data does not belong to the given network!\n");
         exit(EXIT_FAILURE);
@@ -313,7 +353,8 @@ Matrix* feedForward(MLP* network, Matrix* input, MLP_data *neuron_values) {
         prev_z = z;
     }
 
-    return z;
+    copy_values_M(output, z);
+    freeMatrix(z);
 }
 
 
@@ -354,6 +395,15 @@ void back_propagate(MLP *network, MLP *gradients, MLP_data *neuron_values, Matri
         newMatrixAt(&(layer_deltas[i]), num_examples, neuron_values->activated_values[i].columns);
     }
 
+    // resetting the gradients of the batch to 0
+    // (because it contains the values for the last batch)
+
+    for (int n = 0; n < depth; n++) {
+        resetMatrix(&(gradients->weights[n]));
+        resetMatrix(&(gradients->biases[n]));
+    }
+
+
     
     // calculating the loss of the output layer
     double softmax_val = 0; // activated output of softmax neuron
@@ -382,20 +432,31 @@ void back_propagate(MLP *network, MLP *gradients, MLP_data *neuron_values, Matri
         for (int k = 0; k < num_examples; k++) {
             for (int i = 0; i < gradients->weights[n].columns; i++) {
                 sum = 0;
+                activation_delta = (derivative(network->activate[n]))(M_index(&(neuron_values->pre_activated_values[n]), k, i));
                 for (int j = 0; j < gradients->weights[n+1].columns; j++){
                     weight_i_j = M_index(&(network->weights[n+1]), i, j);
-                    activation_delta = (derivative(network->activate[n]))(M_index(&(neuron_values->pre_activated_values[n]), k, i));
-                    sum += M_index(&(layer_deltas[n+1]), k, j) * weight_i_j * activation_delta;
+                    sum += M_index(&(layer_deltas[n+1]), k, j) * weight_i_j;
 
                 }
-                M_index(&(layer_deltas[n]), k, i) = sum;
+                M_index(&(layer_deltas[n]), k, i) = activation_delta * sum;
             }
         }
     }
 
+    /*
+    FILE* fp = fopen("dbgdata/layer_deltas.txt", "a");
+    fprintf(fp, "\nLayer deltas:\n");
+    for (int n = 0; n < depth; n++) {
+        fprintf(fp, "%d:\n", n);
+        write_Matrix_txt(fp, &(layer_deltas[n]));
+        
+    }
+    fprintf(fp, "\n\n\n");
+    fclose(fp);
+    */
 
     // calculating for weights (each examples gets added to the gradient,
-    // then dividing with the number of examples gives mean
+    // then dividing with the number of examples gives mean)
     // activated_m: its the matrix of the layers activated outputs
     // activated value: value of the neuron, which's weight is being calculated
 
@@ -432,12 +493,12 @@ void back_propagate(MLP *network, MLP *gradients, MLP_data *neuron_values, Matri
     }
 
 
-    // calculating gradient in respect of biases is easyer, since it's equal with layer deltas
+    // calculating gradient in respect of biases is easier, since it's equal with layer deltas
     for (int n = 0; n < depth; n++) {
         for (int k = 0; k < num_examples; k++) {
             for (int j = 0; j < gradients->biases[n].columns; j++) {
                 layer_delta = M_index(&(layer_deltas[n]), k, j);
-                M_index(&(gradients->weights[n]), 0, j) += layer_delta;
+                M_index(&(gradients->biases[n]), 0, j) += layer_delta;
             }
         }
     }
@@ -449,6 +510,29 @@ void back_propagate(MLP *network, MLP *gradients, MLP_data *neuron_values, Matri
         }
     }
 
+    for (int n = 0; n < depth; n++) {
+        free(layer_deltas[n].data);
+    }
+    free(layer_deltas);
+
+
+}
+
+
+void modify_weights_biases(MLP* net, MLP* gradients, double learning_rate) {
+    double del_weight;
+    for (int n = 0; n < net->depth; n++) {
+        for (int i = 0; i < net->weights[n].rows; i++) {
+            for (int j = 0; j < net->weights[n].columns; j++) {
+                del_weight = M_index(&(gradients->weights[n]), i, j);
+                M_index(&(net->weights[n]), i, j) -= learning_rate * del_weight;
+            }
+        }
+
+        for (int j = 0; j < net->biases[n].columns; j++) {
+            M_index(&(net->biases[n]), 0, j) -= learning_rate * M_index(&(gradients->biases[n]), 0, j);
+        }
+    }
 }
 
 
@@ -463,6 +547,10 @@ double ReLu(double x) {
 
 
 double ReLu_d(double x) {
+    if (isnan(x)) {
+        fprintf(stderr, "NAN VALUE in relu!\n");
+        exit(EXIT_FAILURE);
+    }
     if (x > 0) {
         return 1;
     }
@@ -487,11 +575,19 @@ void ReLu_M(Matrix* dest) {
 
 
 double sigmoid(double x) {
+    if (isnan(x)) {
+        fprintf(stderr, "NAN VALUE in sigmoid!\n");
+        exit(EXIT_FAILURE);
+    }
     return 1 / (double)(1 + exp(-x));
 }
 
 
 double sigmoid_d(double x) {
+    if (isnan(x)) {
+        fprintf(stderr, "NAN VALUE in sigmoid_d!\n");
+        exit(EXIT_FAILURE);
+    }
     return sigmoid(x) * (1 - sigmoid(x));
 }
 
@@ -510,7 +606,7 @@ void sigmoid_M(Matrix *dest) {
 }
 
 
-void soft_max_M(Matrix *dest) {
+void softmax_M(Matrix *dest) {
     if (dest == NULL) {
         fprintf(stderr, "NULL matrix pointer!\n");
         exit(EXIT_FAILURE);
@@ -519,11 +615,18 @@ void soft_max_M(Matrix *dest) {
 
     for (unsigned int i = 0; i < dest->rows; i++) {
         for (unsigned int j = 0; j < dest->columns; j++) {
+            if (M_index(dest, i, j) > 13) {
+                fprintf(stderr, "Sus in softmax!\n");
+            }
             M_index(dest, i, j) = exp(M_index(dest, i, j));
             sum += M_index(dest, i, j);
         }
         for (unsigned int j = 0; j < dest->columns; j++) {
             M_index(dest, i, j) = M_index(dest, i, j) / sum;
+            if (isnan(M_index(dest, i, j))) {
+                fprintf(stderr, "NAN written in softmax!\n");
+                //exit(EXIT_FAILURE);
+            }
         }
         sum = 0.0;
     }

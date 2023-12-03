@@ -2,6 +2,7 @@
 #define IO_H
 #include "neural_net.h"
 #include <stdint.h>
+#include <stdio.h>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -48,6 +49,9 @@ typedef struct {
 void msb_to_lsb(void *target, size_t size);
 void read_MNIST_data(const char *images_fname, const char *labels_fname, Example **images, size_t *len);
 void write_Matrix_BMP(const char *fname, Matrix *M);
+void write_Matrix_txt(FILE* fp, Matrix* A);
+void write_model_txt(const char* fname, MLP* net);
+void write_neruons_txt(const char* fname, MLP_data* neuron_vals);
 void check_mkdir(char *path);
 void write_MLP(char *fname, MLP *model);
 MLP *read_MLP(char *fname);
