@@ -108,7 +108,7 @@ void demo(){
     printf("MLP implementation of XOR with preset weigths and biases:\n");
 
     // 3 layers, input 2, hidden 2, output 1,
-    activation_f acts[] = {&ReLu_M, &ReLu_M};
+    activation_f_M acts[] = {&ReLu_M, &ReLu_M};
     MLP *net = newMLP(2, 2, 2, 1, acts);
     MLP_data *neuron_values = newMLP_data(net, 4);
 
@@ -381,7 +381,7 @@ void train(const char* fname_images, const char* fname_labels, char* s_epochs, c
 
 
     // 4 layers, input, 2 hidden, output
-    activation_f acts[] = { &ReLu_M, &sigmoid_M, &softmax_M };
+    activation_f_M acts[] = { &ReLu_M, &sigmoid_M, &softmax_M };
     MLP* net = newMLP(3, 28 * 28, 20, 10, acts);
 
     rand_weights_biases(net);
