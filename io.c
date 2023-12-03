@@ -15,6 +15,9 @@ void msb_to_lsb(void *target, size_t size) {
 
 
 void read_MNIST_data(const char *images_fname, const char *labels_fname, Example **images, size_t *len) {
+    check_file(images_fname);
+    check_file(labels_fname);
+
     *images = NULL;
     FILE *raw_images = fopen(images_fname, "rb");
     FILE *raw_labels = fopen(labels_fname, "rb");
@@ -154,6 +157,7 @@ void write_Matrix_BMP(const char *fname, Matrix *M) {
 
 
 Matrix *read_Matrix_BMP(const char *fname) {
+    check_file(fname);
     BMP_HEADER header;
     BITPMAPINFOHEADER dib;
     FILE *image = fopen(fname, "rb");
@@ -247,7 +251,8 @@ void write_neruons_txt(const char *fname, MLP_data *neuron_vals) {
     fclose(fp);
 }
 
-void check_mkdir(char *path) {
+
+void check_mkdir(const char *path) {
     #ifdef _WIN32
         struct _stat info;
         if (_stat(path, &info) == 0 && (info.st_mode & _S_IFDIR) != 0 ) { 
@@ -261,6 +266,25 @@ void check_mkdir(char *path) {
         exit(EXIT_FAILURE);
     }
 
+}
+
+
+void check_file(const char *fname) {
+    int e = 0;
+    #ifdef _WIN32
+        if (_access(fname, 04) != 0) {
+            e = -1;
+        } 
+    #else
+        if (access(fname, F_OK | R_OK) !=  0) {
+            e = -1;
+        }
+    #endif
+
+    if (e != 0) {
+        fprintf(stderr, "%s is not accessible!\n", fname);
+        exit(EXIT_FAILURE);
+    }
 }
 
 
@@ -332,7 +356,8 @@ void write_MLP(char *fname, MLP *model) {
 }
 
 
-MLP *read_MLP(char *fname) {
+MLP *read_MLP(const char *fname) {
+    check_file(fname);
     FILE *fp = fopen(fname, "rb");
     int encoded_activation;
     int depth, input_size, hidden_layer_size, output_size;

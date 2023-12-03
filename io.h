@@ -8,10 +8,12 @@
 #include <direct.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <io.h>
 #define mkdir(dir, mode) _mkdir(dir)
 #else
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 #define mkdir(dir, mode) mkdir(dir, mode)
 #endif
 
@@ -53,9 +55,10 @@ Matrix *read_Matrix_BMP(const char *fname);
 void write_Matrix_txt(FILE *fp, Matrix *A);
 void write_model_txt(const char *fname, MLP *net);
 void write_neruons_txt(const char *fname, MLP_data *neuron_vals);
-void check_mkdir(char *path);
+void check_mkdir(const char *path);
+void check_file(const char *fname);
 void write_MLP(char *fname, MLP *model);
-MLP *read_MLP(char *fname);
+MLP *read_MLP(const char *fname);
 
 
 #endif
