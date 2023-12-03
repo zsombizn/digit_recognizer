@@ -76,7 +76,7 @@ void freeMLP_data(MLP_data *dest);
 void add_row_V_M(Matrix* dest, Matrix* row_V);
 void rand_weights_biases(MLP* network);
 void feedForward(MLP* network, Matrix *input, Matrix *output, MLP_data *neuron_values);
-void back_propagate(MLP* network, MLP* gradients, MLP_data* neuron_values, Matrix* inputs, Matrix* desired_outputs);
+void back_propagate(MLP *network, MLP *gradients, MLP_data *neuron_values, Matrix *inputs, Matrix *desired_outputs);
 void modify_weights_biases(MLP* net, MLP* gradients, double learning_rate);
 double ReLu(double x);
 double ReLu_d(double x);

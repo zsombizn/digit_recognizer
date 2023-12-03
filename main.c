@@ -145,13 +145,8 @@ void demo(){
     MLP *readed = read_MLP("xor.bin");
     neuron_values->origin = readed;
 
-    freeMatrix(res);
 
     feedForward(readed, in, res, neuron_values);
-    
-    MLP *grads = newMLP(2, 2, 2, 1, NULL);
-    
-    back_propagate(readed, grads, neuron_values, in, res, 4);
 
     printf("\noutput2-----------\n");
     print_M(res);
@@ -289,6 +284,8 @@ void demo(){
 
     freeMatrix(test_output);
     freeMatrix(test_correct_out);
+
+    test_model("MNIST_trained.bin");
 
 
 }
