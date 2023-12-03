@@ -443,18 +443,6 @@ void back_propagate(MLP *network, MLP *gradients, MLP_data *neuron_values, Matri
         }
     }
 
-    /*
-    FILE* fp = fopen("dbgdata/layer_deltas.txt", "a");
-    fprintf(fp, "\nLayer deltas:\n");
-    for (int n = 0; n < depth; n++) {
-        fprintf(fp, "%d:\n", n);
-        write_Matrix_txt(fp, &(layer_deltas[n]));
-        
-    }
-    fprintf(fp, "\n\n\n");
-    fclose(fp);
-    */
-
     // calculating for weights (each examples gets added to the gradient,
     // then dividing with the number of examples gives mean)
     // activated_m: its the matrix of the layers activated outputs
@@ -615,18 +603,11 @@ void softmax_M(Matrix *dest) {
 
     for (unsigned int i = 0; i < dest->rows; i++) {
         for (unsigned int j = 0; j < dest->columns; j++) {
-            if (M_index(dest, i, j) > 13) {
-                fprintf(stderr, "Sus in softmax!\n");
-            }
             M_index(dest, i, j) = exp(M_index(dest, i, j));
             sum += M_index(dest, i, j);
         }
         for (unsigned int j = 0; j < dest->columns; j++) {
             M_index(dest, i, j) = M_index(dest, i, j) / sum;
-            if (isnan(M_index(dest, i, j))) {
-                fprintf(stderr, "NAN written in softmax!\n");
-                //exit(EXIT_FAILURE);
-            }
         }
         sum = 0.0;
     }

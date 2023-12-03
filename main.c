@@ -342,6 +342,7 @@ void export_MNIST(const char* fname_images, const char* fname_labels) {
 
 }
 
+
 // train model on MNIST data
 void train(const char* fname_images, const char* fname_labels, char* s_epochs, char* s_batch_size, char* s_learning_rate) {
     if (fname_images == NULL || fname_labels == NULL || s_epochs == NULL || s_batch_size == NULL || s_learning_rate == NULL) {
@@ -375,7 +376,7 @@ void train(const char* fname_images, const char* fname_labels, char* s_epochs, c
 
     rand_weights_biases(net);
 
-    MLP_data* neruon_values = newMLP_data(net, batch_size);
+    MLP_data* neuron_values = newMLP_data(net, batch_size);
 
     MLP* gradients = newMLP(3, 28 * 28, 20, 10, NULL);
 
@@ -400,25 +401,15 @@ void train(const char* fname_images, const char* fname_labels, char* s_epochs, c
 
         while (num_examples - processed > batch_size) {
 
-            feedForward(net, batch, res, neruon_values);
+            feedForward(net, batch, res, neuron_values);
 
-
-            /*
-            printf("\r%d", processed);
-            sprintf(&fname, "dbgdata/%d_%d_net.txt", i, processed);
-            write_model_txt(fname, net);
-            sprintf(&fname, "dbgdata/%d_%d_gradients.txt", i, processed);
-            write_model_txt(fname, gradients);
-            sprintf(&fname, "dbgdata/%d_%d_neuron_values.txt", i, processed);
-            write_neruons_txt(fname, neruon_values);
-            */
-
-            if (processed < 100 || processed % 100 == 0) {
-                printf("\nloss: %lf\n", cross_entropy(res, y_M));
+            if (processed % (batch_size*10) == 0) {
+                printf("Epochs: %3d/%3d, loss: %1.4f\r", i + 1, epochs, cross_entropy(res, y_M));
+                fflush(stdout);
 
             }
 
-            back_propagate(net, gradients, neruon_values, batch, y_M);
+            back_propagate(net, gradients, neuron_values, batch, y_M);
 
             modify_weights_biases(net, gradients, learning_rate);
             
@@ -435,11 +426,10 @@ void train(const char* fname_images, const char* fname_labels, char* s_epochs, c
                 processed++;
             }
         }
+        printf("\n");
         processed = 0;
-        printf("\nEpochs: %d/%d, loss: %lf\n", i + 1, epochs, cross_entropy(res, y_M));
     }
 
-    freeMatrix(batch);
 
     write_MLP("MNIST_trained.bin", net);
     test_model("MNIST_trained.bin");
@@ -449,8 +439,15 @@ void train(const char* fname_images, const char* fname_labels, char* s_epochs, c
     }
 
     free(images);
-    free(y);
+
+    freeMatrix(batch);
     freeMatrix(y_M);
+    free(y);
+
+    freeMLP(net);
+    freeMLP_data(neuron_values);
+    freeMLP(gradients);
+    freeMatrix(res);
 }
 
 
