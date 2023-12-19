@@ -4,12 +4,6 @@ images/*
 latex/*
 obj/*
 
-# MNIST
-*-ubyte
-
-# Etc
-*.bin
-
 # Prerequisites
 *.d
 
