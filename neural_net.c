@@ -663,7 +663,7 @@ double cross_entropy(Matrix *output, Matrix *y) {
 }
 
 
-activation_f derivative(activation_f func) {
+activation_f derivative(activation_f_M func) {
     if (func == &ReLu_M) {
         return &ReLu_d;
     }

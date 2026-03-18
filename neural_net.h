@@ -87,7 +87,7 @@ void sigmoid_M(Matrix *dest);
 void softmax_M(Matrix *dest);
 double MSE(Matrix* output, Matrix* y);
 double cross_entropy(Matrix *output, Matrix *y);
-activation_f derivative(activation_f func);
+activation_f derivative(activation_f_M func);
 
 
 #endif
